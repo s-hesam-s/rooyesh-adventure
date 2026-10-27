@@ -40,6 +40,18 @@ The new office supports keyboard operation, contextual guide dialogue, camera-re
 - Frame-rate-independent movement/collision, scene caching, instancing, LOD and an adaptive render budget control runtime cost.
 - A dependency-free Node.js loopback server serves local assets and restricts methods and file access.
 
+## Repository map
+
+| Path | Purpose |
+| --- | --- |
+| [app/](app/) | Browser client, scene/interaction code and local runtime assets |
+| [scripts/server.mjs](scripts/server.mjs) | Loopback-only static server used by npm start |
+| [tests/](tests/) | Node.js domain, storage, scene and interaction regressions |
+| [docs/](docs/) | Current environment references, interaction standards and historical development reports |
+| [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) | Library and asset notices |
+
+For a fresh checkout, use the declared Node.js prerequisite, run `npm test`, then `npm start` and perform the office/keyboard smoke checks described above. Runtime libraries are vendored, so these commands do not need an npm dependency installation. This is a local browser prototype; it does not connect to a real financial database or payment system.
+
 ## Verification and development
 
     npm test
