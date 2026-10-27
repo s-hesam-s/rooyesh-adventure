@@ -1,0 +1,52 @@
+[
+  {
+    "file": "flower_empodium/model.gltf",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/flower_empodium/flower_empodium_1k.gltf",
+    "sha256": "3F39D6B7DBA6DE81014F5CE41E43AC1204A45BFE146CBB425515103C4C5E9798"
+  },
+  {
+    "file": "flower_empodium/textures/flower_empodium_arm_1k.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/flower_empodium/flower_empodium_arm_1k.jpg",
+    "sha256": "5B49A907DBD98D4D421992CE38AB17DB35ED79451AF062104EFE5BC3E437A852"
+  },
+  {
+    "file": "flower_empodium/textures/flower_empodium_diff_1k.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/flower_empodium/flower_empodium_diff_1k.jpg",
+    "sha256": "ECA8DE7F24D5612D918DDD02339698F9C44B00AD5A9D2FB61D6ACDA267786129"
+  },
+  {
+    "file": "flower_empodium/flower_empodium.bin",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/flower_empodium/flower_empodium.bin",
+    "sha256": "32256FA72ADCF06602F5D80D1B98D2042C546BB3C65AA81A871FFBE22C834A5C"
+  },
+  {
+    "file": "flower_empodium/textures/flower_empodium_nor_gl_1k.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/flower_empodium/flower_empodium_nor_gl_1k.jpg",
+    "sha256": "C752BC6905810E552816189C7E157D111BB9B64402EAB9625271A5B4FAD4C1AB"
+  },
+  {
+    "file": "periwinkle_plant/model.gltf",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/periwinkle_plant/periwinkle_plant_1k.gltf",
+    "sha256": "DF781EEA76123FC6EEE97E6E8D466743E3A5FB08E1A2C3F5025A57E090D2CC55"
+  },
+  {
+    "file": "periwinkle_plant/textures/periwinkle_plant_nor_gl_1k.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/periwinkle_plant/periwinkle_plant_nor_gl_1k.jpg",
+    "sha256": "36D2464E7500F741500228B955C1FB0F26D954E869BD26F93DD25C0FAFC5087D"
+  },
+  {
+    "file": "periwinkle_plant/textures/periwinkle_plant_diff_1k.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/periwinkle_plant/periwinkle_plant_diff_1k.jpg",
+    "sha256": "32D61084E6C07FA3CA8E03B35B347A12717F971EFC90E8FE1185931EE2298C56"
+  },
+  {
+    "file": "periwinkle_plant/textures/periwinkle_plant_arm_1k.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/periwinkle_plant/periwinkle_plant_arm_1k.jpg",
+    "sha256": "D964E2E1118C2CA88C137B45590F48D83D3471FEF48E913CBD57BF7122BBE4A3"
+  },
+  {
+    "file": "periwinkle_plant/periwinkle_plant.bin",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/periwinkle_plant/periwinkle_plant.bin",
+    "sha256": "F039855D84D59F764838285C2B041A5CF255D103AFC856E219A62482826D9655"
+  }
+]

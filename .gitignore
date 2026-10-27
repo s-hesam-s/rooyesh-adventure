@@ -1,0 +1,15 @@
+runtime/*.pid
+runtime/*.log
+runtime/*.exe
+node_modules/
+.env
+.env.*
+!.env.example
+*.pem
+*.pfx
+*.key
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+coverage/

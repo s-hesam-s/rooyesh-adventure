@@ -1,0 +1,67 @@
+[
+  {
+    "file": "modular_wooden_pier/source.gltf",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/modular_wooden_pier/modular_wooden_pier_2k.gltf",
+    "sha256": "1BBFE5CE034790DB55CDEEF51F9CA015EA506913A4CA52DFC630A76BFCC6BC0A"
+  },
+  {
+    "file": "modular_wooden_pier/modular_wooden_pier.bin",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/modular_wooden_pier/modular_wooden_pier.bin",
+    "sha256": "6EC10B84AAAA02800B095850FC92CF850632E5BECD76698DC6609F40F05E1B60"
+  },
+  {
+    "file": "modular_wooden_pier/textures/modular_wooden_pier_planks_arm_2k.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/modular_wooden_pier/modular_wooden_pier_planks_arm_2k.jpg",
+    "sha256": "2B1141C77052449C1DA01E60951211A79FB8C4553F7CC9349894E9D3C996CEC0"
+  },
+  {
+    "file": "modular_wooden_pier/textures/modular_wooden_pier_planks_nor_gl_2k.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/modular_wooden_pier/modular_wooden_pier_planks_nor_gl_2k.jpg",
+    "sha256": "AC17E902940037D13508B0763CB5F07A267117FF6AE74197B9883D70665D914D"
+  },
+  {
+    "file": "modular_wooden_pier/textures/modular_wooden_pier_planks_diff_2k.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/modular_wooden_pier/modular_wooden_pier_planks_diff_2k.jpg",
+    "sha256": "2C7249C008B19732634C86E9DFD4759FAC04FF8C69E0D7C4C6518881398A83FF"
+  },
+  {
+    "file": "modular_wooden_pier/textures/modular_wooden_pier_poles_arm_2k.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/modular_wooden_pier/modular_wooden_pier_poles_arm_2k.jpg",
+    "sha256": "4BF16BE51286362FF725CD34B25F125D7C16ECE3AC4AA29752F345226437C8FA"
+  },
+  {
+    "file": "modular_wooden_pier/textures/modular_wooden_pier_poles_nor_gl_2k.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/modular_wooden_pier/modular_wooden_pier_poles_nor_gl_2k.jpg",
+    "sha256": "AE83A82F0666A47DACDC6A1477A162367317EC448BFE9E5F1DDEF0514C29846F"
+  },
+  {
+    "file": "modular_wooden_pier/textures/modular_wooden_pier_poles_diff_2k.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/modular_wooden_pier/modular_wooden_pier_poles_diff_2k.jpg",
+    "sha256": "002FDFBBA4149D918DAA1F7109F2602D0C0737434C08F09BEEBC4347EBF97DD9"
+  },
+  {
+    "file": "coast_land_rocks_02/source.gltf",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/coast_land_rocks_02/coast_land_rocks_02_2k.gltf",
+    "sha256": "976262BD7E645710AE85D94B76F5C84538684A0FEDE22CCFCDDA5C49A6E21C4B"
+  },
+  {
+    "file": "coast_land_rocks_02/textures/coast_land_rocks_02_diff_2k.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/coast_land_rocks_02/coast_land_rocks_02_diff_2k.jpg",
+    "sha256": "A8561F7A988646FB76D2D837C11FA76DBC88C52C7D9ED615AC6EB094CF47A666"
+  },
+  {
+    "file": "coast_land_rocks_02/coast_land_rocks_02.bin",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/coast_land_rocks_02/coast_land_rocks_02.bin",
+    "sha256": "E981AF395C1A546C2244D95954B8D4406BD11E26047975772B88418F3728ADC6"
+  },
+  {
+    "file": "coast_land_rocks_02/textures/coast_land_rocks_02_arm_2k.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/coast_land_rocks_02/coast_land_rocks_02_arm_2k.jpg",
+    "sha256": "E2271F9B0DB4646B5D38586495C7ECBA627D880F80706048751E5A61EC7736BD"
+  },
+  {
+    "file": "coast_land_rocks_02/textures/coast_land_rocks_02_nor_gl_2k.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/coast_land_rocks_02/coast_land_rocks_02_nor_gl_2k.jpg",
+    "sha256": "CD2090EFCA0EC0FAA94D67BD1C1E188B6452910D67A756244EF91FC19066B56D"
+  }
+]

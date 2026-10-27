@@ -1,0 +1,27 @@
+[
+  {
+    "file": "coast_land_rocks_02/near.gltf",
+    "source": "Derived locally from coast_land_rocks_02 source.gltf",
+    "sha256": "8565D8752E05CCA1C1F123045AB1948D077AA5C233B78A201E6BED1F7B22876D"
+  },
+  {
+    "file": "coast_land_rocks_02/near.bin",
+    "source": "Derived locally from coast_land_rocks_02 source.gltf",
+    "sha256": "5C470C871C7A61C4AD84068333EADF8CBA89524DD392B5B7CB93FB5900ACC3DE"
+  },
+  {
+    "file": "coast_land_rocks_02/far.gltf",
+    "source": "Derived locally from coast_land_rocks_02 source.gltf",
+    "sha256": "55F0EEC456AD5F39F24A609CC8966A68ECA8443B1C1950934FA4B777CBC59C65"
+  },
+  {
+    "file": "coast_land_rocks_02/far.bin",
+    "source": "Derived locally from coast_land_rocks_02 source.gltf",
+    "sha256": "FD0B7E89DA7E0416D20FD95B9EF8C939590E9067859252A6137AFC9F42AB4DC4"
+  },
+  {
+    "file": "coast_land_rocks_02/optimization.json",
+    "source": "Derived locally from coast_land_rocks_02 source.gltf",
+    "sha256": "3F9E1E9B859999545485A2BB9302C36542FC17B34FA152E4AFA5CAF9557DF5FB"
+  }
+]

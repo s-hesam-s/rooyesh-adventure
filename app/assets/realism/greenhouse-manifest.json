@@ -1,0 +1,17 @@
+[
+  {
+    "file": "concrete/diff.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/concrete_floor_02/concrete_floor_02_diff_2k.jpg",
+    "sha256": "B08A20DCB306D08EE7F4A05EC216B19B7FD37E95745998EC5F81ECEDAAC1F0E9"
+  },
+  {
+    "file": "concrete/normal.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/concrete_floor_02/concrete_floor_02_nor_gl_2k.jpg",
+    "sha256": "CE12D18F283F884F4BE6F6C110F81582376049CAADA1E226958659D3D5FBAAE1"
+  },
+  {
+    "file": "concrete/rough.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/concrete_floor_02/concrete_floor_02_rough_2k.jpg",
+    "sha256": "CB539B0F8FDC8C63241683E01C923EB040FA701EC4C60CFF27B674294746AE67"
+  }
+]

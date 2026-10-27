@@ -1,0 +1,11 @@
+import * as T from '../../vendor/three.module.js';
+
+// Keep static plants in small spatial batches so frustum culling and LOD remain useful.
+export function batchStaticPlants(parent){
+ parent.updateMatrixWorld(true);const inverse=new T.Matrix4().copy(parent.matrixWorld).invert(),roots=[];parent.traverse(o=>{if(o.userData.staticPlant)roots.push(o);});const cells=new Map(),position=new T.Vector3();
+ for(const root of roots){root.getWorldPosition(position).applyMatrix4(inverse);const cx=Math.floor(position.x/12)*12+6,cz=Math.floor(position.z/12)*12+6,key=root.userData.plantKind+':'+cx+':'+cz;if(!cells.has(key))cells.set(key,{x:cx,z:cz,levels:new Map()});const cell=cells.get(key),levels=root.isLOD?root.levels.map(l=>l.object):[root];
+  levels.forEach((level,index)=>{if(!cell.levels.has(index))cell.levels.set(index,new Map());const batches=cell.levels.get(index);level.traverse(mesh=>{if(!mesh.isMesh)return;const key=mesh.geometry.uuid+':'+(Array.isArray(mesh.material)?mesh.material.map(m=>m.uuid).join(','):mesh.material.uuid);if(!batches.has(key))batches.set(key,{geometry:mesh.geometry,material:mesh.material,castShadow:mesh.castShadow,receiveShadow:mesh.receiveShadow,matrices:[]});const matrix=new T.Matrix4().multiplyMatrices(inverse,mesh.matrixWorld);matrix.elements[12]-=cell.x;matrix.elements[14]-=cell.z;batches.get(key).matrices.push(matrix);});});
+ }
+ let meshes=0;for(const cell of cells.values()){const lod=new T.LOD();lod.name='static-plant-cell';lod.position.set(cell.x,0,cell.z);for(const [level,batches] of cell.levels){const group=new T.Group();for(const b of batches.values()){const mesh=new T.InstancedMesh(b.geometry,b.material,b.matrices.length);b.matrices.forEach((m,i)=>mesh.setMatrixAt(i,m));mesh.castShadow=b.castShadow;mesh.receiveShadow=b.receiveShadow;mesh.computeBoundingSphere();group.add(mesh);meshes++;}lod.addLevel(group,level?20:0,.12);}lod.addLevel(new T.Group(),95,.12);parent.add(lod);}
+ roots.forEach(root=>root.removeFromParent());return {plants:roots.length,meshes,cells:cells.size};
+}

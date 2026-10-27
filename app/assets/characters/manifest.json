@@ -1,0 +1,37 @@
+[
+  {
+    "file": "guide.glb",
+    "source": "https://raw.githubusercontent.com/mrdoob/three.js/r180/examples/models/gltf/Michelle.glb",
+    "sha256": "7A87E15A99CCBC5E5877BE66E1E4ECAE0A581ADCAFA0CCE1A5569F49909E968E"
+  },
+  {
+    "file": "guide.bin",
+    "source": "Extracted locally from guide.glb",
+    "sha256": "F8926B050B95570CF67D68AD51835F6F695509A66DB48B73E1FF6BF141BE7A16"
+  },
+  {
+    "file": "guide.gltf",
+    "source": "Extracted locally from guide.glb",
+    "sha256": "A7702621188407EE17C6C956CD7A02C5E9B9C3BABBA5C7E1743DADE24505712F"
+  },
+  {
+    "file": "guide-0.png",
+    "source": "Extracted locally from guide.glb",
+    "sha256": "26AC1CE02BCC5EEF6C7F01046AAD17517517BB940CE3F20C27D95DA87BB68910"
+  },
+  {
+    "file": "guide-1.png",
+    "source": "Extracted locally from guide.glb",
+    "sha256": "527D2852103BC862FD43FEC057DA603B5B19D3DC30CFBEC2B1CD06484B5F6FCB"
+  },
+  {
+    "file": "guide-2.png",
+    "source": "Extracted locally from guide.glb",
+    "sha256": "6C43CE8637B78B532617D1E38A4F856FEBA212E855BDB07536828EBD8CE362F1"
+  },
+  {
+    "file": "guide-3.png",
+    "source": "Extracted locally from guide.glb",
+    "sha256": "86F19DEEA076C4A8980DAE5E9E7704CB0CEE28F092BDC0418158FDBA4DE7511C"
+  }
+]

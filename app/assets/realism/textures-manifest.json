@@ -1,0 +1,47 @@
+[
+  {
+    "file": "wood/diff.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/brown_planks_03/brown_planks_03_diff_2k.jpg",
+    "sha256": "1140CEAC531C2DFE2E714357E34CD81CCE62878CED24FA711B87C4CA24416058"
+  },
+  {
+    "file": "wood/normal.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/brown_planks_03/brown_planks_03_nor_gl_2k.jpg",
+    "sha256": "4AA94E511DDA5ED998194DEBAF6049806F44A0AFD3B750168EFCD7A35BC0FF4A"
+  },
+  {
+    "file": "wood/rough.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/brown_planks_03/brown_planks_03_rough_2k.jpg",
+    "sha256": "CFB6BF6494D6487C56B2699A45D71966439BC2CC41B386B12A62451048F0172C"
+  },
+  {
+    "file": "ground/diff.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/forest_ground_04/forest_ground_04_diff_1k.jpg",
+    "sha256": "50A4DDA30875020C64385261AA7E00E2155B592302FA6794165F58FAE73CBD2C"
+  },
+  {
+    "file": "ground/normal.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/forest_ground_04/forest_ground_04_nor_gl_1k.jpg",
+    "sha256": "9C3A0200E02CE40EDFFBBF9F5F623EF08EA9B1B7812B556182EC978F88887151"
+  },
+  {
+    "file": "ground/rough.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/forest_ground_04/forest_ground_04_rough_1k.jpg",
+    "sha256": "89D4D50395EB92824A64132C4BC8A5A09009071E0B325AB66DC3104C7A3090ED"
+  },
+  {
+    "file": "path/diff.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/bicolour_gravel/bicolour_gravel_diff_2k.jpg",
+    "sha256": "F3D82B56B34CFBFE5C5093893B17DAAF46B5863091283D78A7620B65B10B1D0F"
+  },
+  {
+    "file": "path/normal.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/bicolour_gravel/bicolour_gravel_nor_gl_2k.jpg",
+    "sha256": "AF3802D15A7BA5206B13A0F54EEF1CDC9D3A51CC2170809233615B60A10DC969"
+  },
+  {
+    "file": "path/rough.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/bicolour_gravel/bicolour_gravel_rough_2k.jpg",
+    "sha256": "D07330B1BF0C0FA776071E483A9A83D1DD3D336BC325119F8BEE3876193D24D1"
+  }
+]

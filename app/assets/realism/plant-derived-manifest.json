@@ -1,0 +1,27 @@
+[
+  {
+    "file": "potted_plant_01/near.gltf",
+    "source": "Derived locally from potted_plant_01 source.gltf",
+    "sha256": "D0422986EB7DBCCD481A784A52CB1066A2F6EF578F781AD3E1613BEEA9275AB4"
+  },
+  {
+    "file": "potted_plant_01/near.bin",
+    "source": "Derived locally from potted_plant_01 source.gltf",
+    "sha256": "B2106B8F3AB6D7B7D06C9A5C2BDBFF7F571C16E9460422B30A305A5AED58FAEE"
+  },
+  {
+    "file": "potted_plant_01/far.gltf",
+    "source": "Derived locally from potted_plant_01 source.gltf",
+    "sha256": "E1463D0779AC987E3043B5191811E0603330D569DD3B3CD2082805D68F90EA7C"
+  },
+  {
+    "file": "potted_plant_01/far.bin",
+    "source": "Derived locally from potted_plant_01 source.gltf",
+    "sha256": "76B8713D6882C2975B5B17622D6C2C7B6D3F967CA8F2C4F671B8171D491BC16F"
+  },
+  {
+    "file": "potted_plant_01/optimization.json",
+    "source": "Derived locally from potted_plant_01 source.gltf",
+    "sha256": "8DF8DF19E00D0204E244022D0D2EB7389FDA3E33CB91FFD08D796850D1D3AC66"
+  }
+]

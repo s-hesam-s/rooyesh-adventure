@@ -1,0 +1,32 @@
+[
+  {
+    "file": "cliff/diff.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rock_face_03/rock_face_03_diff_2k.jpg",
+    "sha256": "644EE79DF7FFBF5F6AFC330B64DD3F33794BAB8820915FE61FFE0C88ECFD7ECE"
+  },
+  {
+    "file": "cliff/normal.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rock_face_03/rock_face_03_nor_gl_2k.jpg",
+    "sha256": "A498CEF4BA6191F6959B6D03FB835263C77271948264A289AF24497AB7111DEC"
+  },
+  {
+    "file": "cliff/rough.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rock_face_03/rock_face_03_rough_2k.jpg",
+    "sha256": "9CA3E9E196685F702328F24D66F039B72F5330FC35CF2A2C265CFA50A7916301"
+  },
+  {
+    "file": "meadow/diff.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/aerial_grass_rock/aerial_grass_rock_diff_2k.jpg",
+    "sha256": "1A2DDFA4652ADBE00447B940C40019D46F4B88245BC1B341CDF622C2110B7BC5"
+  },
+  {
+    "file": "meadow/normal.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/aerial_grass_rock/aerial_grass_rock_nor_gl_2k.jpg",
+    "sha256": "C6AA14B042CE243F93A6CA807F46A085711C23AD316B104578E92DF7770EE285"
+  },
+  {
+    "file": "meadow/rough.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/aerial_grass_rock/aerial_grass_rock_rough_2k.jpg",
+    "sha256": "FC0FFF40E3378F2F54D225DB6E3E566A8563BB2C143EEF0F09B543C9D4698776"
+  }
+]

@@ -1,0 +1,26 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {relativeMovement,clampPitch,canInspectFrom,avoidTables} from '../app/src/game/firstPerson.js';
+import {movePlayer,layoutFor,cartAt,walkable} from '../app/src/game/world.js';
+import {nodes} from '../app/src/content/story.js';
+test('forward and strafe follow camera orientation without changing speed',()=>{for(const yaw of [0,Math.PI/2,Math.PI,4.1]){const a=relativeMovement(0,-1,yaw),b=relativeMovement(1,0,yaw);assert.ok(Math.abs(Math.hypot(a.dx,a.dy)-1)<1e-10);assert.ok(Math.abs(a.dx*b.dx+a.dy*b.dy)<1e-10);}assert.deepEqual(relativeMovement(0,-1,0),{dx:0,dy:-1});const west=relativeMovement(0,-1,Math.PI/2);assert.ok(west.dx<-.99);});
+test('pitch stays below vertical and interaction needs proximity and facing',()=>{assert.equal(clampPitch(7),1.25);assert.equal(clampPitch(-7),-1.25);assert.ok(canInspectFrom({x:640,y:640},{x:640,y:600},0));assert.ok(!canInspectFrom({x:640,y:640},{x:640,y:600},Math.PI));assert.ok(!canInspectFrom({x:640,y:740},{x:640,y:600},0));});
+test('camera movement still respects roads and diagonal normalization',()=>{const layout=layoutFor(Object.values(nodes)[0]),p={x:640,y:790};const a=movePlayer(p,0,-1,.05,layout,78),b=movePlayer(p,1,-1,.05,layout,78);assert.ok(Math.abs(Math.hypot(a.x-p.x,a.y-p.y)-Math.hypot(b.x-p.x,b.y-p.y))<1e-9);});test('first person cannot walk through an inspection table',()=>{const objects=[{x:440,y:600}],p={x:440,y:624,moving:true},next={x:440,y:620,moving:true};const result=avoidTables(p,next,objects);assert.equal(result.y,624);assert.equal(result.x,440);assert.equal(avoidTables(p,{x:480,y:624},objects).x,480);});test('river cart stays on the bridge walking corridor throughout its cycle',()=>{const node=Object.values(nodes).find(n=>n.theme==='water'),layout=layoutFor(node);for(let time=0;time<60;time+=.25){const p=cartAt(node,time);assert.ok(walkable(p,layout,10));assert.ok(Math.abs(p.x-640)<44);assert.ok(p.y>=659&&p.y<=751);}});
+import {advanceFirstPerson,walkingSpeed} from '../app/src/game/firstPerson.js';
+import * as T from '../app/vendor/three.module.js';
+import {batchStaticPlants} from '../app/src/render/staticPlants.js';
+test('first-person travel covers the same distance at 10 through 120 FPS',()=>{
+ const layout=layoutFor(nodes['c-entrance']);for(const fps of [10,15,20,30,60,120]){let p={x:640,y:790};for(let i=0;i<fps;i++)p=advanceFirstPerson(p,0,-1,1/fps,layout);assert.ok(Math.abs(p.y-(790-walkingSpeed))<1e-8,`${fps} FPS`);assert.equal(p.moving,true);}
+});
+test('low-frame-rate movement cannot tunnel through tables or leave roads',()=>{
+ const layout=layoutFor(nodes['c-identity']);let p={x:440,y:640};for(let i=0;i<20;i++)p=advanceFirstPerson(p,0,-1,.1,layout);assert.ok(p.y>=622);assert.ok(walkable(p,layout,10));let edge={x:640,y:790};for(let i=0;i<20;i++)edge=advanceFirstPerson(edge,1,0,.15,layout);assert.ok(walkable(edge,layout,10));assert.ok(edge.x<685);const stall=advanceFirstPerson({x:640,y:790},0,-1,10,layout);assert.ok(Math.abs(stall.y-(790-walkingSpeed*.15))<1e-7);assert.equal(advanceFirstPerson(stall,0,0,.1,layout).moving,false);
+});
+test('static plant batches retain transformed instances, materials and both LOD levels',()=>{
+ const scene=new T.Group(),parent=new T.Group();parent.position.set(4,2,7);parent.rotation.y=.4;scene.add(parent);const geometry=new T.BoxGeometry(),farGeometry=new T.BoxGeometry(.5,.5,.5),material=new T.MeshStandardMaterial(),expected=[];
+ for(let i=0;i<3;i++){const root=new T.LOD();root.userData.staticPlant=true;root.userData.plantKind=2;root.position.set(1+i,0,2);root.scale.setScalar(1+i*.2);for(const [g,d] of [[geometry,0],[farGeometry,16]]){const mesh=new T.Mesh(g,material);mesh.position.y=2;mesh.castShadow=mesh.receiveShadow=true;root.addLevel(mesh,d);}parent.add(root);}
+ scene.updateMatrixWorld(true);parent.children.forEach(root=>expected.push(root.levels[0].object.matrixWorld.clone()));const result=batchStaticPlants(parent);assert.equal(result.plants,3);assert.equal(result.meshes,2);scene.updateMatrixWorld(true);const lod=parent.children[0],mesh=lod.levels[0].object.children[0];assert.equal(mesh.count,3);assert.equal(mesh.material,material);assert.equal(lod.levels.length,3);assert.equal(lod.levels[1].object.children[0].geometry,farGeometry);for(let i=0;i<3;i++){const matrix=new T.Matrix4();mesh.getMatrixAt(i,matrix);matrix.premultiply(mesh.matrixWorld);matrix.elements.forEach((v,j)=>assert.ok(Math.abs(v-expected[i].elements[j])<1e-5));}geometry.dispose();farGeometry.dispose();material.dispose();
+});
+import {createRenderBudget} from '../app/src/render/performance.js';
+test('render budget responds to sustained load without oscillating on pauses or stalls',()=>{
+ const budget=createRenderBudget();for(let i=0;i<40;i++)assert.equal(budget.sample(.04),1);for(let i=0;i<40;i++)budget.sample(.04);assert.equal(budget.sample(1),.9);for(let i=0;i<300;i++)budget.sample(.05,false);assert.equal(budget.sample(NaN),.9);for(let i=0;i<600;i++)budget.sample(.04);assert.equal(budget.sample(0),.7);for(let i=0;i<120;i++)budget.sample(1/60);assert.equal(budget.sample(0),.7);for(let i=0;i<600;i++)budget.sample(1/60);assert.ok(budget.sample(0)>.7);assert.equal(budget.reset(),1);
+});

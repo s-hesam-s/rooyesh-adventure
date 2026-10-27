@@ -1,0 +1,27 @@
+import * as T from '../../vendor/three.module.js';
+export const noise=(x,y)=>{const v=Math.sin(x*127.1+y*311.7)*43758.5453;return v-Math.floor(v);};
+function smooth(x,y){const ix=Math.floor(x),iy=Math.floor(y),u=x-ix,v=y-iy,a=u*u*(3-2*u),b=v*v*(3-2*v);return T.MathUtils.lerp(T.MathUtils.lerp(noise(ix,iy),noise(ix+1,iy),a),T.MathUtils.lerp(noise(ix,iy+1),noise(ix+1,iy+1),a),b);}
+function fbm(x,y){let v=0,a=.5;for(let i=0;i<5;i++){v+=smooth(x,y)*a;x*=2.03;y*=2.03;a*=.5;}return v;}
+function texture(kind){const c=document.createElement('canvas');c.width=c.height=512;const q=c.getContext('2d'),data=q.createImageData(512,512);const base={grass:[89,108,58],path:[164,140,103],wood:[123,91,57],soil:[74,61,42],bark:[89,77,56],stone:[114,119,106]}[kind];
+ for(let y=0;y<512;y++)for(let x=0;x<512;x++){let n=fbm(x/44,y/44),grain=noise(x,y);if(kind==='wood'||kind==='bark')n=fbm(x/9,y/160)*.6+Math.sin(x*.21+fbm(x/60,y/110)*8)*.12+.2;let v=(n-.45)*65+(grain-.5)*28;if(kind==='path'&&grain>.975)v+=35;const i=(y*512+x)*4;for(let j=0;j<3;j++)data.data[i+j]=base[j]+v;data.data[i+3]=255;}
+ q.putImageData(data,0,0);const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.wrapS=t.wrapT=T.RepeatWrapping;t.anisotropy=8;return t;}
+export function createDetails(renderer,scene,{externalEnvironment=false}={}){
+ const maps=Object.fromEntries(['grass','path','wood','soil','bark','stone'].map(k=>[k,texture(k)]));
+ const surface={};for(const [k,map] of Object.entries(maps)){map.repeat.set(k==='grass'?30:k==='path'?6:2,k==='grass'?24:k==='path'?6:2);surface[k]=new T.MeshStandardMaterial({map,bumpMap:map,bumpScale:k==='bark'?.22:.14,roughness:k==='wood'?.78:.94});}
+ if(!externalEnvironment){const sky=document.createElement('canvas');sky.width=1024;sky.height=512;const q=sky.getContext('2d'),g=q.createLinearGradient(0,0,0,512);g.addColorStop(0,'#487da4');g.addColorStop(.43,'#b8d1d6');g.addColorStop(.53,'#e5d7ad');g.addColorStop(.58,'#7e9067');g.addColorStop(1,'#485a3c');q.fillStyle=g;q.fillRect(0,0,1024,512);
+ for(let i=0;i<32;i++){const x=noise(i,3)*1024,y=100+noise(i,5)*105;const cloud=q.createRadialGradient(x,y,0,x,y,35+noise(i,6)*50);cloud.addColorStop(0,'#fff9e143');cloud.addColorStop(1,'#fff9e100');q.fillStyle=cloud;q.fillRect(x-100,y-100,200,200);}
+ const skyTex=new T.CanvasTexture(sky);skyTex.colorSpace=T.SRGBColorSpace;skyTex.mapping=T.EquirectangularReflectionMapping;scene.background=skyTex;const pmrem=new T.PMREMGenerator(renderer),environment=pmrem.fromEquirectangular(skyTex);scene.environment=environment.texture;scene.environmentIntensity=.65;pmrem.dispose();}
+ const leafShape=new T.Shape();leafShape.moveTo(0,0);leafShape.bezierCurveTo(-.6,.3,-.5,1.1,0,1.5);leafShape.bezierCurveTo(.5,1.1,.6,.3,0,0);const leafGeo=new T.ShapeGeometry(leafShape,4);leafGeo.rotateX(-Math.PI/2);
+  const leafCanvas=document.createElement('canvas');leafCanvas.width=leafCanvas.height=256;const lc=leafCanvas.getContext('2d');const lg=lc.createLinearGradient(0,0,256,256);lg.addColorStop(0,'#b8c990');lg.addColorStop(.5,'#73914c');lg.addColorStop(1,'#a3b674');lc.fillStyle=lg;lc.fillRect(0,0,256,256);lc.strokeStyle='#d5dd9d80';lc.lineWidth=3;lc.beginPath();lc.moveTo(128,0);lc.lineTo(128,256);lc.stroke();lc.lineWidth=1;for(let i=20;i<245;i+=23){lc.beginPath();lc.moveTo(128,i);lc.lineTo(15,i+55);lc.moveTo(128,i);lc.lineTo(241,i+55);lc.stroke();}const leafTex=new T.CanvasTexture(leafCanvas);leafTex.colorSpace=T.SRGBColorSpace;
+ const leafMat=new T.MeshStandardMaterial({map:leafTex,bumpMap:leafTex,bumpScale:.025,color:'#91aa6a',side:T.DoubleSide,roughness:.8});
+ const barkGeo=new T.CylinderGeometry(.65,1,1,12,3),matrix=new T.Matrix4(),dummy=new T.Object3D();
+ function tree(parent,x,z,id){const group=new T.Group();group.position.set(x,0,z);parent.add(group);const h=10+noise(id,8)*7;
+  const trunk=new T.Mesh(barkGeo,surface.bark);trunk.position.y=h/2;trunk.scale.set(.65,h,.65);trunk.castShadow=true;group.add(trunk);
+  const leaves=new T.InstancedMesh(leafGeo,leafMat,480),color=new T.Color();
+  for(let j=0;j<8;j++){const a=j*2.399,len=3+noise(id,j)*2.5,base=new T.Vector3(0,h*.5+j*.5,0),end=new T.Vector3(Math.cos(a)*len,h*.8+j*.45,Math.sin(a)*len);const branch=new T.Mesh(barkGeo,surface.bark);branch.position.copy(base).lerp(end,.5);branch.scale.set(.18,base.distanceTo(end),.18);branch.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),end.clone().sub(base).normalize());branch.castShadow=true;group.add(branch);}
+  for(let j=0;j<480;j++){const a=noise(j,id)*Math.PI*2,r=Math.sqrt(noise(j+100,id))*5.2,yy=noise(j+300,id);dummy.position.set(Math.cos(a)*r,h*.75+yy*5,Math.sin(a)*r);dummy.rotation.set(noise(j,2)*1.1,noise(j,3)*6.28,noise(j,4)*.5);dummy.scale.setScalar(.75+noise(j,5)*.9);dummy.updateMatrix();leaves.setMatrixAt(j,dummy.matrix);color.setHSL(.22+noise(j,10)*.08,.3+noise(j,11)*.22,.23+noise(j,12)*.16);leaves.setColorAt(j,color);}
+  leaves.castShadow=true;leaves.receiveShadow=true;group.add(leaves);return leaves;
+ }
+ function assign(color){if(['#7b9060'].includes(color))return surface.grass;if(color==='#c2ac80')return surface.path;if(['#746044','#73573a'].includes(color))return surface.bark;if(['#8c7350','#ab8559','#a17d4d','#786447','#9e845b','#b39769','#a88b60','#9c8259','#b6a078'].includes(color))return surface.wood;if(color==='#4f5334')return surface.soil;return null;}
+ return {assign,tree,leafGeo,leafMat};
+}

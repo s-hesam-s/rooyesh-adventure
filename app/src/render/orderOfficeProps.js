@@ -1,0 +1,26 @@
+import * as T from '../../vendor/three.module.js';
+export function buildOfficeEquipment(group,f,t,m,h){
+ const {box:b,cylinder:c,beam,page,folio,tray,text}=t,{w,d}=f;
+ function wheel(x,z){const o=c('office-cart-wheel',x,.38,z,.38,.2,m.dark);o.rotation.z=Math.PI/2;b('office-cart-fork',x,.74,z,.12,.38,.35,m.metal);}
+ function paperStack(x,y,z,width,depth,count=5){for(let i=0;i<count;i++)b('office-paper-sheet',x+(i%2)*.025,y+.018+i*.035,z,width,.035,depth,m.paper);}
+ function folder(x,y,z,width,depth){b('office-folder-cover',x,y+.08,z,width,.16,depth,m.cover2);b('office-folder-pages',x,y+.18,z,width*.94,.08,depth*.93,m.paper);b('office-folder-tab',x-width*.28,y+.09,z-depth*.52,width*.27,.12,depth*.12,m.cover);}
+ if(f.kind==='cart'){
+  for(const x of [-w*.4,w*.4])for(const z of [-d*.38,d*.38]){wheel(x,z);b('office-cart-upright',x,2,z,.12,2.6,.12,m.metal);}for(const y of [1,2.8]){b('office-cart-shelf',0,y,0,w,.15,d,m.metal);for(const x of [-w/2,w/2])b('office-cart-lip',x,y+.2,0,.08,.35,d,m.metal);}for(let i=0;i<4;i++)folder(-w*.3+i*w*.2,1.08,0,w*.18,d*.75);paperStack(0,2.88,0,w*.7,d*.65,8);for(const x of [-w*.4,w*.4])b('office-cart-handle-post',x,3.3,-d*.38,.12,1,.12,m.metal);beam('office-cart-handle',[-w*.4,3.8,-d*.38],[w*.4,3.8,-d*.38],.16,m.cover2);
+ }else if(f.kind==='forms'){
+  b('office-dispenser-foot',0,.12,0,w,.24,d,m.metal);b('office-dispenser-spine',0,3.6,-d*.3,w*.7,7,.35,m.panel);for(let i=0;i<4;i++){const y=1.4+i*1.5;b('office-form-pocket-back',0,y+.55,-.2,w*.75,1.3,.12,m.metal);b('office-form-pocket-bottom',0,y,.45,w*.75,.12,1.4,m.metal);b('office-form-pocket-front',0,y+.35,1.1,w*.75,.7,.12,m.cover);for(const x of [-w*.375,w*.375])b('office-form-pocket-side',x,y+.35,.45,.1,.7,1.4,m.metal);for(let k=0;k<3;k++)b('office-blank-form',k*.03,y+.61,.1+k*.05,w*.62,1.1,.025,m.paper);}
+ }else if(f.kind==='scanner'){
+  b('office-scanner-plinth',0,1.35,0,w*.9,2.7,d*.9,m.panel);b('office-scanner-top',0,2.8,0,w,.2,d,m.wood);b('office-scanner-base',0,3.05,0,w*.72,.3,d*.7,m.dark);b('office-scanner-glass',0,3.215,0,w*.65,.03,d*.6,m.modelGlass||m.glass);b('office-scan-rail',0,3.18,0,w*.6,.025,.08,m.glow);b('office-scanner-control',w*.38,3.25,0,w*.12,.1,d*.5,m.panel);for(const z of [-.5,.5])c('office-scanner-control-button',w*.38,3.34,z,.12,.08,m.paper);paperStack(-w*.1,3.24,0,w*.4,d*.4,1);
+  const lid=new T.Group();lid.name='office-scanner-lid';lid.position.set(0,3.2,-d*.35);lid.rotation.x=-.6;group.add(lid);const panel=new T.Mesh(h.geo('office-lid-box',()=>new T.BoxGeometry(1,1,1)),m.metal);panel.position.z=d*.35;panel.scale.set(w*.72,.12,d*.7);panel.castShadow=true;lid.add(panel);for(const x of [-w*.25,w*.25]){const hinge=c('office-scanner-hinge',x,3.2,-d*.35,.15,.4,m.brass);hinge.rotation.z=Math.PI/2;}for(let i=0;i<4;i++)b('office-scanner-drawer',0,.55+i*.55,d*.46,w*.72,.48,.08,m.metal);
+ }else if(f.kind==='binding'){
+  b('office-binding-cabinet',0,1.35,0,w*.9,2.7,d*.8,m.wood);b('office-binding-top',0,2.8,0,w,.2,d,m.metal);b('office-punch-base',0,3.02,0,w*.64,.24,d*.55,m.dark);paperStack(0,3.14,.3,w*.48,d*.6,5);for(const x of [-w*.24,w*.24]){b('office-punch-upright',x,3.6,-d*.2,.18,1.2,.18,m.metal);c('office-punch-die',x,3.34,-d*.1,.12,.3,m.brass);}beam('office-punch-handle',[-w*.24,4.2,-d*.2],[w*.24,4.2,-d*.2],.2,m.dark);for(let i=0;i<8;i++)b('office-comb-binding',-w*.32+i*w*.09,2.98,d*.35,.065,.16,.55,m.cover);b('office-binding-drawer',0,1.4,d*.405,w*.72,1.2,.08,m.panel);b('office-binding-pull',0,1.4,d*.46,w*.18,.12,.12,m.brass);
+ }else if(f.kind==='shelving'){
+  for(const x of [-w*.45,w*.45])b('office-shelf-frame',x,4,0,.18,8,.22,m.metal);for(const y of [.4,2.8,5.2,7.6]){b('office-shelf-board',0,y,0,w,.18,d,m.wood);for(let i=0;i<3;i++){const x=-w*.3+i*w*.3;if(y<6){b('office-storage-box',x,y+.64,0,w*.26,1.1,d*.8,i%2?m.cover:m.cover2);b('office-storage-lid',x,y+1.24,0,w*.27,.1,d*.83,m.paper);b('office-storage-handle',x,y+.65,d*.405,w*.09,.16,.035,m.dark);}}}
+ }else if(f.kind==='shredder'){
+  b('office-shredder-bin',0,1.5,0,w*.8,3,d*.8,m.panel);b('office-shredder-head',0,3.1,0,w,.2,d,m.metal);b('office-shredder-slot',0,3.215,0,w*.6,.025,.12,m.dark);b('office-bin-window',0,1.5,d*.405,w*.55,2,.035,m.modelGlass||m.glass);for(let i=0;i<13;i++){const strip=b('office-shredded-paper',Math.sin(i)*w*.2,.7+(i%4)*.3,d*.42,.065,.45,.025,m.paper);strip.rotation.z=i*.7;}
+ }else if(f.kind==='condition'){
+  b('office-history-base',0,1.25,0,w*.72,2.5,d*.8,m.wood);b('office-history-cap',0,2.6,0,w*.8,.2,d*.85,m.metal);for(const x of [-w*.23,w*.23]){b('office-history-upright',x,4.6,0,.22,4,.22,m.metal);b('office-history-pocket',x,4.9,0,w*.36,3.2,.28,m.cover2);b('office-history-pocket-lip',x,3.5,.22,w*.36,.4,.25,m.metal);for(const side of [-1,1])b('office-history-pocket-side',x+side*w*.18,4.9,.2,.09,3.2,.65,m.metal);}
+  // The investor history is an empty physical pocket; the neighbouring pocket contains the purchase conditions.
+  b('office-conditions-sheet',w*.23,4.95,.16,w*.31,2.75,.035,m.paper);for(const [i,s]of ['اولین خرید','حداقل ۵۰'].entries())text(s,w*.23,5.4-i*.65,.184,Math.min(w*.27,3),.4);b('office-empty-pocket-label',-w*.23,3.7,.37,2,.5,.025,m.paper);text('آرمان',-w*.23,3.7,.39,1.7,.3);
+ }else return false;
+ return true;
+}

@@ -1,0 +1,17 @@
+[
+  {
+    "file": "periwinkle_plant/far.gltf",
+    "source": "Derived locally from periwinkle_plant/model.gltf",
+    "sha256": "3839D0EBF68C5D45C1BB84010AEF859935AA6C0817E961BDFD3268AAB5A9918E"
+  },
+  {
+    "file": "periwinkle_plant/far.bin",
+    "source": "Derived locally from periwinkle_plant/model.gltf",
+    "sha256": "6FA99CB0436A4F501230696B0EF6326A9435E3F5153FFA2E12DCE64CC832E4FA"
+  },
+  {
+    "file": "periwinkle_plant/optimization.json",
+    "source": "Derived locally from periwinkle_plant/model.gltf",
+    "sha256": "D532DCB53CB1F8FECB82D8D4234321569182339473FC4A7AA01DD9B78A1E369B"
+  }
+]

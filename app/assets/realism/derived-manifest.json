@@ -1,0 +1,27 @@
+[
+  {
+    "file": "island_tree_02/near.gltf",
+    "source": "Derived locally from island_tree_02 source.gltf",
+    "sha256": "0886B9A83107C0DBE778F0383A6BAE72E6B551E0243B14910C07E1BAC2FB12D1"
+  },
+  {
+    "file": "island_tree_02/near.bin",
+    "source": "Derived locally from island_tree_02 source.gltf",
+    "sha256": "23B443A24B7FB7590F4EB8BB8B2D8DFE37B7C4E65D14B6118E2E1010D331A94E"
+  },
+  {
+    "file": "island_tree_02/far.gltf",
+    "source": "Derived locally from island_tree_02 source.gltf",
+    "sha256": "92466444EF30A81398457E41F3894EB4100F1D0BA4DBACE84A116C6A161C6519"
+  },
+  {
+    "file": "island_tree_02/far.bin",
+    "source": "Derived locally from island_tree_02 source.gltf",
+    "sha256": "9756127B5A59D66817DC32C42667CE0A09513371F61ABF5ADD2F131B68264B07"
+  },
+  {
+    "file": "island_tree_02/optimization.json",
+    "source": "Derived locally from island_tree_02 source.gltf",
+    "sha256": "EE323EBD233DC23A9B62CD7643C7D402C575E2BDD45A2FD427D1F16B79D25005"
+  }
+]

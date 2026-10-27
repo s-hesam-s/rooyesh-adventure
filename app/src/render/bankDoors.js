@@ -1,0 +1,20 @@
+import * as T from '../../vendor/three.module.js';
+import {paymentTools} from './paymentTools.js';
+import {createDoorDestinationView} from './archiveRoomView.js';
+import {layoutFor} from '../game/world.js';
+import {nodes} from '../content/campaign.js';
+export function buildBankDoors(root,node,layout,h,m){
+ const repair=Boolean(node.repairFor);
+ for(const g of layout.gates){
+  const frame=new T.Group();frame.name='bank-door-frame';frame.position.set((g.x-640)*.1,0,(g.y-450)*.1);frame.rotation.y=g.travelYaw;root.add(frame);const {box:b,cylinder:c,screen}=paymentTools(frame,h,m);
+  for(const x of [-4.5,4.5]){b('bank-door-jamb',x,5.2,0,.2,10.4,.65,m.steel);b('bank-door-jamb-shoe',x,.15,0,.5,.3,.85,m.dark);}b('bank-door-crown',0,10.4,0,9.2,.35,.7,m.wood);b('bank-door-transom',0,9.4,0,8.8,1.8,.14,m.doorGlass);screen('bank-door-label',0,9.45,.22,8.2,1.25,[repair?'بازگشت به اتاق پایاپای':g.exit.label]);
+  const leaves=[],handles=[];
+  for(const side of [-1,1]){const pivot=new T.Group();pivot.position.set(side*4.4,0,0);frame.add(pivot);const t=paymentTools(pivot,h,m),x=-side*2.2;t.box('bank-door-leaf',x,4.25,0,4.4,8.5,.18,m.doorGlass);t.box('bank-door-bottom',x,1,0,4.4,2,.22,m.wood);for(const xx of [0,-side*4.4])t.box('bank-door-stile',xx,4.25,0,.12,8.5,.28,m.metal);for(const y of [2,8.4])t.box('bank-door-rail',x,y,0,4.4,.14,.28,m.metal);for(const y of [1,4.3,7.5])t.box('bank-door-hinge',0,y,0,.25,.4,.4,m.steel);for(const y of [3.7,4.5])t.box('bank-handle-mount',-side*3.9,y,.22,.18,.18,.28,m.steel);const handle=t.box('bank-door-handle',-side*3.9,4.1,.38,.1,.9,.12,m.accent);t.box('bank-door-closer',-side*.6,8.1,.27,.8,.28,.35,m.steel);pivot.traverse(o=>{if(o.isMesh)o.userData.dynamic=true;});leaves.push({pivot,side});handles.push({root:handle,side});}
+  g.bar=b('bank-door-lock',0,9.45,.45,.12,.12,.05,m.accent);g.bar.userData.dynamic=true;g.door={leaves,handles,apply(pose){for(const leaf of leaves)leaf.pivot.rotation.y=leaf.side*pose.open*1.48;}};
+  let targetCenter={x:0,z:29},targetDoorId='retry',rotationYaw=-g.travelYaw;
+  if(repair){const target=layoutFor(nodes.verifyBank).gates.find(q=>q.exit.id==='route-'+node.id.at(-1));targetCenter={x:(target.x-640)*.1,z:(target.y-450)*.1};targetDoorId=target.exit.id;rotationYaw=target.travelYaw;}
+  else if(!g.exit.next.startsWith('repair-verifyBank-')){const target=layoutFor(nodes[g.exit.next]);targetCenter={x:(target.spawn.x-640)*.1,z:(target.spawn.y-450)*.1+5};targetDoorId='';}
+  const view=createDoorDestinationView(root,g,h,{direction:repair?1:-1,targetCenter,targetDoorId}),eye=new T.Vector3(),center=frame.position.clone(),normal=new T.Vector3(Math.sin(g.travelYaw),0,Math.cos(g.travelYaw)),tangent=new T.Vector3(Math.cos(g.travelYaw),0,-Math.sin(g.travelYaw));view.position.copy(center).addScaledVector(normal,-4.6);view.position.y=10;view.rotation.y=g.travelYaw;g.destinationLink.rotationYaw=rotationYaw;
+  const compile=view.material.onBeforeCompile;view.onBeforeRender=(_r,_s,camera)=>eye.setFromMatrixPosition(camera.matrixWorld);view.material.onBeforeCompile=shader=>{compile(shader);shader.uniforms.bankEye={value:eye};shader.uniforms.bankCenter={value:center};shader.uniforms.bankNormal={value:normal};shader.uniforms.bankTangent={value:tangent};shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 bankPortalPoint;').replace('#include <worldpos_vertex>','#include <worldpos_vertex>\nbankPortalPoint=(modelMatrix*vec4(position,1.)).xyz;');shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 bankPortalPoint;uniform vec3 bankEye;uniform vec3 bankCenter;uniform vec3 bankNormal;uniform vec3 bankTangent;').replace('#include <clipping_planes_fragment>','#include <clipping_planes_fragment>\nfloat portalRay=dot(bankCenter-bankEye,bankNormal)/dot(bankPortalPoint-bankEye,bankNormal);vec3 aperture=mix(bankEye,bankPortalPoint,portalRay);if(abs(dot(aperture-bankCenter,bankTangent))>4.4||aperture.y<0.||aperture.y>10.4)discard;');};view.material.customProgramCacheKey=()=> 'bank-aperture-v1';
+ }
+}

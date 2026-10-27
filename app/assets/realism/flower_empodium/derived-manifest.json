@@ -1,0 +1,17 @@
+[
+  {
+    "file": "flower_empodium/far.gltf",
+    "source": "Derived locally from flower_empodium/model.gltf",
+    "sha256": "0D0B0B9201CC7A75E6C59ADB75AC2B154120C7AA76167959BBA271098CEF8AFA"
+  },
+  {
+    "file": "flower_empodium/far.bin",
+    "source": "Derived locally from flower_empodium/model.gltf",
+    "sha256": "CE7908007B5CA05C3B9415BCC495B0F83B002CFF7AABEB7725971C3EF42185B7"
+  },
+  {
+    "file": "flower_empodium/optimization.json",
+    "source": "Derived locally from flower_empodium/model.gltf",
+    "sha256": "4878ECA94D4292765B4F922689C55EF60661B1CAC6CAA8B3B72503DCA56ABF5A"
+  }
+]

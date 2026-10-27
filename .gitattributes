@@ -1,0 +1,12 @@
+* text=auto eol=lf
+*.cmd text eol=crlf
+app/assets/** -text
+app/vendor/** -text
+scripts/vendor/** -text
+*.png -text
+*.jpg -text
+*.hdr -text
+*.bin -text
+*.glb -text
+*.gltf -text
+*.woff2 -text

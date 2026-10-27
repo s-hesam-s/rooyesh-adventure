@@ -1,0 +1,27 @@
+[
+  {
+    "file": "vendor/addons/objects/Water2.js",
+    "source": "https://raw.githubusercontent.com/mrdoob/three.js/r180/examples/jsm/objects/Water2.js",
+    "sha256": "3378A701E77BE423DBFAB7D19DA21B5255EA1965A05C5E756F9BB0E7F65BE56F"
+  },
+  {
+    "file": "vendor/addons/objects/Reflector.js",
+    "source": "https://raw.githubusercontent.com/mrdoob/three.js/r180/examples/jsm/objects/Reflector.js",
+    "sha256": "482A723E9FDFD7F8B1532D1EFAAD0D2CF2572AB711467939888F72B260DF290C"
+  },
+  {
+    "file": "vendor/addons/objects/Refractor.js",
+    "source": "https://raw.githubusercontent.com/mrdoob/three.js/r180/examples/jsm/objects/Refractor.js",
+    "sha256": "BFBBDD1DF8DA080B25969C36AED448C7233F693DE42C47A80E1072F8976A0765"
+  },
+  {
+    "file": "assets/water/normal-1.jpg",
+    "source": "https://raw.githubusercontent.com/mrdoob/three.js/r180/examples/textures/water/Water_1_M_Normal.jpg",
+    "sha256": "6D7825469A374FF84700B4FB1A2890BD1FCE0CA1F777BDD4D5ECDAF15833A804"
+  },
+  {
+    "file": "assets/water/normal-2.jpg",
+    "source": "https://raw.githubusercontent.com/mrdoob/three.js/r180/examples/textures/water/Water_2_M_Normal.jpg",
+    "sha256": "1F6F3FC5AF584FB3AD7FF97DF39B1835AAA184F53BF647C63120A83BE7D63183"
+  }
+]

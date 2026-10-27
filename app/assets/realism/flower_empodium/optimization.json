@@ -1,0 +1,13 @@
+{
+  "tool": "meshoptimizer 0.24.0",
+  "reports": [
+    {
+      "name": "far",
+      "originalTriangles": 3053,
+      "triangles": 852,
+      "bytes": 40976,
+      "ratio": 0.28,
+      "error": 0.02
+    }
+  ]
+}
