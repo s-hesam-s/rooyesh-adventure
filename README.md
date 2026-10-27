@@ -67,3 +67,9 @@ Public availability does not grant a project-wide open-source license. Third-par
 ---
 
 بازی آموزشی مستقل برای تجربه عملی فرایند تأمین مالی جمعی است. نسخه فعلی قابل اجراست، اما بازطراحی شش محیط هنوز کامل نشده است. مرجع ادامه کار و وضعیت واقعی هر محیط در docs/ENVIRONMENT-UPGRADE-REFERENCE.md نگهداری می‌شود. تمام عملیات مالی ساختگی و محلی‌اند.
+
+## Continuous integration
+
+GitHub Actions runs `npm test` on Node.js 22 and 24 using the vendored runtime assets; no npm dependency installation is needed. This checks the existing automated regression suite, not visual WebGL behavior, performance or a deployed environment.
+
+The [CI workflow](.github/workflows/ci.yml) runs for pull requests and pushes to `main`, and can be started manually. It uses read-only repository permissions and does not deploy the project.
