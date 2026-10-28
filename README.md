@@ -81,3 +81,9 @@ Public availability does not grant a project-wide open-source license. Third-par
 GitHub Actions runs `npm test` on Node.js 22 and 24 using the vendored runtime assets; no npm dependency installation is needed. This checks the existing automated regression suite, not visual WebGL behavior, performance or a deployed environment.
 
 The [CI workflow](.github/workflows/ci.yml) runs for pull requests and pushes to `main`, and can be started manually. It uses read-only repository permissions and does not deploy the project.
+
+## Maintenance checks
+
+The existing CI also runs weekly on Monday and checks tracked Markdown file destinations with `scripts/check_doc_links.py`. Its negative tests cover moved documents, missing picture variants, paths outside the repository and untracked local drafts. External URLs and heading fragments are intentionally outside this offline file check. Scheduled runs do not deploy or start original application hosts.
+
+The vendored Three.js core/module match the official npm 0.180.0 release and are hash-guarded in `docs/runtime-advisories.json`. CI queries current reviewed advisories for that exact version. No game rules, environments or financial workflows change in this maintenance group.
