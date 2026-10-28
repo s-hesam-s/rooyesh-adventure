@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   pull_request:
+  schedule:
+    - cron: '18 4 * * 1'
   workflow_dispatch:
 
 permissions:
@@ -34,3 +36,16 @@ jobs:
           package-manager-cache: false
       - name: Run game regression suite
         run: npm test
+
+      - name: Check tracked documentation destinations
+        run: python3 scripts/check_doc_links.py
+      - name: Test documentation link regressions
+        run: python3 -m unittest discover -s tests -p test_doc_links.py
+      - name: Validate vendored runtime identity
+        run: python3 scripts/check_advisories.py --offline
+      - name: Test advisory checker
+        run: python3 -m unittest discover -s tests -p test_advisories.py
+      - name: Check current Three.js advisories
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/check_advisories.py

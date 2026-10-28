@@ -1,0 +1,17 @@
+{
+  "scope": "Vendored Three.js core/module identified against the official npm 0.180.0 tarball. Hash drift requires re-identification; this is not an audit of all asset files.",
+  "packages": [
+    {
+      "name": "three",
+      "version": "0.180.0",
+      "files": [
+        "app/vendor/three.core.js",
+        "app/vendor/three.module.js"
+      ],
+      "sha256LF": {
+        "app/vendor/three.core.js": "eb077d2417f61d3e6d9264c317cabc4ea35769ed6b0ab533067292a550784c20",
+        "app/vendor/three.module.js": "c8211c69345d2e9949dc7a8ac969380497aa0600a5a8ac6a459c8cd02dd9cb8a"
+      }
+    }
+  ]
+}
