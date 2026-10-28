@@ -6,6 +6,14 @@ A Persian first-person 3D learning game about crowdfunding operations. Players e
 
 ![Redesigned first office](docs/office-current.png)
 
+## Gameplay preview
+
+<picture><source media="(prefers-reduced-motion: reduce)" srcset="docs/screenshots/portfolio-poster.png" /><source type="image/webp" srcset="docs/screenshots/portfolio.webp" /><img src="docs/screenshots/portfolio.gif" width="100%" alt="Rooyesh · Path of the Sun — actual captured UI states" /></picture>
+
+Actual first-office environment-test capture: entering the room, walking, turning and opening the journal. Playable prototype under active development; the six-environment redesign remains incomplete.
+
+[Reproduce this capture and view the static image](docs/PORTFOLIO-PREVIEW.md)
+
 ## What it teaches
 
 The scenario follows project review, issuer commitment, receipt submission and publication, individual and corporate participation, bank reconciliation, receipt validation, submission tracking, final approvals, certificates, and post-funding obligations. It separates payment success from submission success, capacity completion from final approval, and a scheduled obligation from an actual payment.
