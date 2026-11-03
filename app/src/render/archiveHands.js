@@ -1,3 +1,4 @@
+import {paperGrip,referencePaperGrip} from './paperGrip.js';
 import {createPlayerWear} from './playerAppearance.js';
 import * as T from '../../vendor/three.module.js';
 import {clone} from '../../vendor/addons/utils/SkeletonUtils.js';
@@ -36,7 +37,7 @@ export function createArchiveHands(camera,source){
   const arm=mesh(root,sleeveGeo,sleeve,0,0,0),cuff=mesh(root,new T.CylinderGeometry(.071,.072,.045,28),edge,0,0,0);
   const anchor=new T.Group();anchor.name='fitted-'+name.toLowerCase()+'-wrist-anchor';root.add(anchor);const wear=createPlayerWear(anchor,side);cuff.visible=false;
   const wristMaterial=new T.MeshStandardMaterial({color:'#dab18f',roughness:.68});const wristSurface=mesh(anchor,new T.CylinderGeometry(.071,.074,.18,40),wristMaterial,0,0,.07,1,.70,1);wristSurface.rotation.x=Math.PI/2;wristSurface.scale.set(1,1,.70);
-  return {group,body,fingers,side,arm,cuff,wear,anchor,wristMaterial};
+  return {group,body,fingers,side,arm,cuff,wear,anchor,wristMaterial,gripCache:new Map()};
  }
  const left=hand(-1),right=hand(1),bag=new T.Group();bag.name='archive-open-backpack';root.add(bag);
  // Separate walls leave an actual cavity: the document is occluded by the bag, not hidden early.
@@ -57,8 +58,11 @@ export function createArchiveHands(camera,source){
   for(const h of [left,right]){
    const appearance=h.wear.update(role);h.group.scale.setScalar(appearance.handScale);
    const p=pose?(h.side<0?pose.left:pose.right):{position:[h.side*Math.min(.29,.35*aspect),-.67+lean,-.66],rotation:[.15,h.side*.12,h.side*.17],grip:.22};
+   const shown=p.visible!==false;h.group.visible=h.arm.visible=h.anchor.visible=shown;if(!shown)continue;
    h.group.position.fromArray(p.position);h.group.rotation.set(...p.rotation,'YXZ');
-   for(const f of h.fingers){const amount=(f.digit==='Thumb'?.38:.85)*(p.grip||0)*(f.segment===1?.65:1);f.joint.quaternion.copy(f.rest).premultiply(new T.Quaternion().setFromAxisAngle(f.axis,-amount));}
+   for(const f of h.fingers){const curl=p.grasp==='reference-paper'?.03:p.grasp==='paper'&&!['Thumb','Index'].includes(f.digit)?(p.relaxedCurl||.85)*Math.min(1,(p.grip||0)/.68):(p.grip||0),amount=(f.digit==='Thumb'?.38:.85)*curl*(f.segment===1?.65:1);f.joint.quaternion.copy(f.rest).premultiply(new T.Quaternion().setFromAxisAngle(f.axis,-amount));}
+   if(p.grasp==='reference-paper'){const grasp=referencePaperGrip(h);for(const {joint,rotation}of grasp.joints)joint.quaternion.copy(rotation);h.group.position.sub(grasp.anchor.clone().multiplyScalar(appearance.handScale).applyQuaternion(h.group.quaternion));}
+   if(p.grasp==='paper'){const weight=T.MathUtils.clamp((p.grip||0)/.68,0,1),grasp=paperGrip(h,p.thickness||.02,appearance.handScale);for(const {joint,rotation}of grasp.joints)joint.quaternion.slerp(rotation,weight);const offset=grasp.anchor.clone().multiplyScalar(appearance.handScale*weight).applyQuaternion(h.group.quaternion);h.group.position.sub(offset);}
    shoulder.set(h.side*Math.min(.52,.55*aspect),-1.02,.14);wristPoint.copy(h.group.position);direction.copy(wristPoint).sub(shoulder);
    const axis=direction.clone().normalize(),armEnd=wristPoint.clone().addScaledVector(axis,-.15);
    h.arm.position.copy(shoulder).lerp(armEnd,.5);h.arm.quaternion.setFromUnitVectors(up,axis);h.arm.scale.set(appearance.armWidth,shoulder.distanceTo(armEnd),appearance.armWidth);

@@ -1,0 +1,13 @@
+import * as T from '../../vendor/three.module.js';
+export function advanceCarryBlend(value,reading,{moving=false,paused=false,reduced=false,dt=0}={}){const target=reading&&!moving&&!paused?1:0;return reduced?target:T.MathUtils.lerp(value,target,1-Math.exp(-Math.min(.1,Math.max(0,dt))*18));}
+export function documentCarryPose(camera,width,depth,thickness=.2,options={}){
+ const blend=T.MathUtils.clamp(options.blend||0,0,1),aspect=Math.max(.4,camera.aspect||1),tan=Math.tan(T.MathUtils.degToRad(camera.fov||72)/2),card=options.gripType==='card',scale=(card?.19:depth>width?.328:.48)/width,angle=T.MathUtils.lerp(1.18,1.34,blend),rotation=new T.Quaternion().setFromAxisAngle(new T.Vector3(0,0,1),.30).multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),angle)),corners=[],surfaceY=options.surfaceY||0;
+ for(const x of [-width/2,width/2])for(const y of [-thickness/2,thickness/2])for(const z of [-depth/2,depth/2])corners.push(new T.Vector3(x,y+surfaceY,z).multiplyScalar(scale).applyQuaternion(rotation));
+ const ext=new T.Box3().setFromPoints(corners),span=ext.getSize(new T.Vector3()),front=ext.max.z,carryDistance=Math.max(card?1.05:1.45,front+span.y/(.4*tan),front+span.x/(1.08*tan*aspect)),readDistance=Math.max(card?.65:.82,front+span.y/(1.2*tan),front+span.x/(1.55*tan*aspect)),distance=T.MathUtils.lerp(carryDistance,readDistance,blend),position=new T.Vector3(0,0,-distance),cx=T.MathUtils.lerp(.28,0,blend),cy=T.MathUtils.lerp(-.73,-.28,blend);
+ // Fit the projected centre, including the nearer edge of a tilted document.
+ for(let i=0;i<5;i++){let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;for(const c of corners){const d=distance-c.z,x=(position.x+c.x)/(d*tan*aspect),y=(position.y+c.y)/(d*tan);minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);}position.x+=(cx-(minX+maxX)/2)*distance*tan*aspect;position.y+=(cy-(minY+maxY)/2)*distance*tan;}
+ const orientation=rotation.clone().multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),-.90)).multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(0,0,1),Math.PI)),angles=new T.Euler().setFromQuaternion(orientation,'YXZ');
+ const contact=new T.Vector3(-width*scale/2+Math.min(.043,width*scale*.23),(surfaceY+thickness/2)*scale+.012,-depth*scale*.20).applyQuaternion(rotation).add(position);
+ const hand=side=>side>0?{visible:false,position:[0,-2,-1],rotation:[0,0,0],grip:0}:{visible:true,position:contact.toArray(),rotation:[angles.x,angles.y,angles.z],grip:.03,grasp:'reference-paper',thickness:thickness*scale};
+ return {position,rotation,scale,hands:{left:hand(-1),right:hand(1),bag:{visible:false,position:[0,-2,-1],open:0,zip:0}}};
+}

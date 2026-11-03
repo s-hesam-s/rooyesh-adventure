@@ -25,4 +25,4 @@ export function officePanel(state,station){
  body+='<p class="office-key-help">Tab یا جهت‌ها: انتخاب · E / Enter / فاصله: اجرا · Escape: بستن</p>';
  return {title,body};
 }
-export const sixEnvironments=[{id:'office',name:'دفتر بررسی و بایگانی طرح',ready:true},{id:'issuer',name:'پایگاه اجرایی و مالی گلخانه آفتاب',ready:true},{id:'natural',name:'مرکز مشارکت آرمان'},{id:'operations',name:'مرکز عملیات مالی'},{id:'completion',name:'مرکز قرارداد و تکمیل تأمین'},{id:'obligations',name:'مرکز تعهدات و سررسیدها'}];
+export const sixEnvironments=[{id:'office',name:'دفتر بررسی و بایگانی طرح',ready:true},{id:'issuer',name:'پایگاه اجرایی و مالی گلخانه آفتاب',ready:true},{id:'natural',name:'خانه مشارکت آفتاب',ready:true},{id:'operations',name:'مرکز عملیات مالی'},{id:'completion',name:'مرکز قرارداد و تکمیل تأمین'},{id:'obligations',name:'مرکز تعهدات و سررسیدها'}];
