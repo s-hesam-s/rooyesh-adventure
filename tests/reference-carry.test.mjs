@@ -4,7 +4,7 @@ import * as T from '../app/vendor/three.module.js';
 import {sourceRig} from './helpers/guideRig.mjs';
 import {createArchiveHands} from '../app/src/render/archiveHands.js';
 import {documentCarryPose} from '../app/src/render/documentCarry.js';
-const profiles=[{w:1.55,d:.95,t:.05,y:.025,card:true},{w:3.6,d:2.7,t:.26,y:.12},{w:1.22,d:.9,t:.18,y:.085},{w:1.7,d:1.2,t:.18,y:0},{w:2.2,d:2.8,t:.05,y:.025},{w:2.5,d:3.2,t:.28,y:.09}];
+const profiles=[{w:2.5,d:3.2,t:.24,y:0},{w:1.55,d:.95,t:.05,y:.025,card:true},{w:3.6,d:2.7,t:.26,y:.12},{w:1.22,d:.9,t:.18,y:.085},{w:1.7,d:1.2,t:.18,y:0},{w:2.2,d:2.8,t:.05,y:.025},{w:2.5,d:3.2,t:.28,y:.09}];
 function clipPolygon(poly,axis,limit,sign){const out=[];for(let i=0;i<poly.length;i++){const a=poly[i],b=poly[(i+1)%poly.length],da=(a[axis]-limit)*sign,db=(b[axis]-limit)*sign;if(da>=0)out.push(a);if((da>=0)!=(db>=0))out.push(a.clone().lerp(b,da/(da-db)));}return out;}
 function intersectingTriangles(group,local,p,scale){
  let hits=0;

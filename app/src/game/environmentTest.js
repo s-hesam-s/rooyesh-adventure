@@ -3,7 +3,7 @@ import {newJourney,interact,travel} from './campaignState.js';
 const authoredFlags=['archiveRoom','calendarRoom','workshopRoom','canalRoom','postalRoom','atriumRoom','receptionRoom','orchardRoom','paymentRoom','bankRoom','auditRoom'];
 export const testEnvironments=challenges.filter(c=>authoredFlags.some(flag=>nodes[c.id].scene[flag])).map(c=>({id:c.id,name:nodes[c.id].scene.name}));
 export function createEnvironmentTestJourney(target,id=globalThis.crypto.randomUUID()){
- if(!testEnvironments.some(e=>e.id===target))throw new Error('این محیط هنوز برای تست مستقیم آماده نشده است.');
+ if(target!=='legalIdentity'&&!testEnvironments.some(e=>e.id===target))throw new Error('این محیط هنوز برای تست مستقیم آماده نشده است.');
  let state=newJourney('manager',id);
  for(let i=0;i<challenges.length;i++){
   if(state.nodeId===target)return state;
