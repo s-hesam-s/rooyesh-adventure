@@ -1,3 +1,9 @@
+import {inCompletion,completionDurations,completionObjective} from './game/completionWorkflow.js';
+import {completionNode,completionLayout,completionInteractionRank} from './game/completionRoom.js';
+import {completionPanel} from './ui/completionUI.js';
+import {inOperations,operationsDurations,operationsObjective} from './game/operationsWorkflow.js';
+import {operationsNode,operationsLayout} from './game/operationsRoom.js';
+import {operationsPanel} from './ui/operationsUI.js';
 import {carriedItem} from './game/carriedItem.js';
 import {inParticipation,participationDurations} from './game/participationWorkflow.js';
 import {participationNode,participationLayout} from './game/participationRoom.js';
@@ -20,7 +26,7 @@ import {advanceFirstPerson} from './game/firstPerson.js';
 import {createSoundscape} from './game/soundscape.js';
 import {nodes,endings,endingScenes} from './content/campaign.js';
 import {characters} from './content/characters.js';
-import {newJourney,interact,travel,officeAct,issuerAct,participationAct,collide,exitsFor,missingItems,itemLabel,journeyLog,chapterProgress} from './game/campaignState.js';
+import {newJourney,interact,travel,officeAct,issuerAct,participationAct,operationsAct,completionAct,collide,exitsFor,missingItems,itemLabel,journeyLog,chapterProgress} from './game/campaignState.js';
 import {START,layoutFor,distance,movePlayer,findPath,walkable,cartAt,pushAway} from './game/world.js';
 import {readSave,writeSave} from './game/campaignStorage.js';
 import {createRenderer} from './render/scene3d.js';
@@ -40,6 +46,8 @@ let frameSamples=[],measuredFps=0;
 let renderer;
 try{renderer=await createRenderer(canvas);$('asset-loading').remove();}catch(error){$('asset-loading').textContent='بارگذاری محیط کامل نشد. صفحه را تازه کن؛ اگر مشکل ادامه داشت، فایل‌های محلی بازی را بررسی کن.';throw error;}
 const soundscape=createSoundscape();
+let completionDevice=null,completionJobClock=0;
+let operationsDevice=null,operationsJobClock=0;
 let participationDevice=null,participationJobClock=0;
 let issuerDevice=null,issuerJobClock=0;
 let officeDevice=null,officeScanClock=0,officeHandoffClock=0;
@@ -47,8 +55,8 @@ let collection=null,highQuality=false,inspectedEntry=null,roleCardUntil=0;
 const fa=n=>new Intl.NumberFormat('fa-IR').format(n);
 const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function documentBody(text){return String(text).split(/\n\s*\n/).map(paragraph=>'<p>'+esc(paragraph)+'</p>').join('');}
-function currentNode(){if(mode!=='menu'&&inParticipation(state))return participationNode;if(mode!=='menu'&&inIssuer(state))return issuerNode;if(mode==='menu'||inOffice(state))return officeNode;return state.ending?endingScenes[state.ending]:nodes[state.nodeId];}
-function currentLayout(){return inParticipation(state)?participationLayout(state.participation):inIssuer(state)?issuerLayout(state.issuer):inOffice(state)?officeLayout(state.office):layoutFor(currentNode());}
+function currentNode(){if(mode!=='menu'&&inCompletion(state))return completionNode;if(mode!=='menu'&&inOperations(state))return operationsNode;if(mode!=='menu'&&inParticipation(state))return participationNode;if(mode!=='menu'&&inIssuer(state))return issuerNode;if(mode==='menu'||inOffice(state))return officeNode;return state.ending?endingScenes[state.ending]:nodes[state.nodeId];}
+function currentLayout(){return inCompletion(state)?completionLayout(state.completion):inOperations(state)?operationsLayout():inParticipation(state)?participationLayout(state.participation):inIssuer(state)?issuerLayout(state.issuer):inOffice(state)?officeLayout(state.office):layoutFor(currentNode());}
 function save(){testSession.persist(()=>{
  saved=state;savedPosition={x:player.x,y:player.y};
  if(!writeSave(storage,state,player)){show('storage-warning',true);$('storage-warning').textContent='ذخیره مرورگر در دسترس نیست؛ سفر فعلی فقط تا بستن صفحه باقی می‌ماند.';}else show('storage-warning',false);
@@ -72,13 +80,13 @@ function openDialog(title,body,actions=[{label:'ادامه مسیر',action:'clo
  dialog.innerHTML='<div class="dialog-head"><h2 id="dialog-title">'+title+'</h2><button data-dialog="close" aria-label="بستن">×</button></div><div class="dialog-body">'+body+'</div><div class="dialog-actions">'+actions.map(a=>'<button data-dialog="'+a.action+'" class="'+(a.primary?'primary':'secondary')+'">'+a.label+'</button>').join('')+'</div>';
  if(!dialog.open)dialog.showModal();focusDialog(dialog,token);
 }
-function closeDialog(){readingHeld=false;delete dialog.dataset.environment;participationDevice=null;issuerDevice=null;officeDevice=null;dialog.classList.remove('office-device','office-guide');dialog.close();keys.clear();lastTime=performance.now();if(mode==='play')canvas.focus({preventScroll:true});else previousFocus?.focus();}
+function closeDialog(){readingHeld=false;delete dialog.dataset.environment;completionDevice=null;operationsDevice=null;participationDevice=null;issuerDevice=null;officeDevice=null;dialog.classList.remove('office-device','office-guide');dialog.close();keys.clear();lastTime=performance.now();if(mode==='play')canvas.focus({preventScroll:true});else previousFocus?.focus();}
 function updateHUD(){
- const node=currentNode();$('game').classList.toggle('office-mode',inParticipation(state)||inIssuer(state)||inOffice(state)||mode==='menu');
+ const node=currentNode();$('game').classList.toggle('office-mode',inCompletion(state)||inOperations(state)||inParticipation(state)||inIssuer(state)||inOffice(state)||mode==='menu');
  $('chapter-title').textContent=mode==='menu'?'هر راه، یک داستان.':node.title;
  $('chapter-kicker').textContent=mode==='menu'?'یک ماجراجویی در دنیای تأمین مالی':(node.scene?.name||node.area)+' / '+characters[state.role].name+' · '+characters[state.role].role;
  document.querySelector('.chapter').classList.toggle('menu-chapter',mode==='menu');
- $('objective').textContent=inParticipation(state)?(!state.participation.idScanned?'کارت هویت را از کیف بردار و اسکن کن.':!state.participation.identity?'در رایانه پذیرش، هویت خودت را تطبیق بده.':!state.participation.firstRegistered?'فیش موجود را اسکن و خرید اول را ثبت کن.':!state.participation.requested?'خرید دوم را در غرفه درگاه ثبت کن.':!state.participation.receiptCollected?'رسید درخواست را چاپ کن و بردار.':!state.participation.assembled?'مدارک دو خرید را روی میز درخواست جمع کن.':!state.participation.handed?'بسته مدارک را بردار و به سارا تحویل بده.':'در نقش سارا به مرکز عملیات مالی برو.'):inIssuer(state)?(!state.issuer.identity?'مدارک شرکت مجری را بررسی کن.':!state.issuer.calculated?'تعهد مجری را محاسبه کن.':!state.issuer.registered?'دو فیش را بررسی، اسکن و ثبت کن.':!state.issuer.handed?'بسته ثبت‌شده را از پیشخوان به سارا تحویل بده.':!state.issuer.sent?'فیش‌ها را از رایانه ارسال کن.':!state.issuer.receiptTaken?'رسید پیگیری را چاپ کن و بردار.':!state.issuer.published?'زمان و وضعیت را بررسی و طرح را منتشر کن.':'به مرکز مشارکت برو.'):inOffice(state)?(!state.office.reviewed?'پرونده را بررسی، تطبیق و اسکن کن.':!state.office.handed?'بسته نتیجه را از میز بررسی به نادر تحویل بده.':'در نقش نادر از در خروج به گلخانه برو.'):node.objective||'';
+ $('objective').textContent=inCompletion(state)?completionObjective(state):inOperations(state)?operationsObjective(state):inParticipation(state)?(!state.participation.idScanned?'کارت هویت را از کیف بردار و اسکن کن.':!state.participation.identity?'در رایانه پذیرش، هویت خودت را تطبیق بده.':!state.participation.firstRegistered?'فیش موجود را اسکن و خرید اول را ثبت کن.':!state.participation.requested?'خرید دوم را در غرفه درگاه ثبت کن.':!state.participation.receiptCollected?'رسید درخواست را چاپ کن و بردار.':!state.participation.assembled?'مدارک دو خرید را روی میز درخواست جمع کن.':!state.participation.handed?'بسته مدارک را بردار و به سارا تحویل بده.':'در نقش سارا به مرکز عملیات مالی برو.'):inIssuer(state)?(!state.issuer.identity?'مدارک شرکت مجری را بررسی کن.':!state.issuer.calculated?'تعهد مجری را محاسبه کن.':!state.issuer.registered?'دو فیش را بررسی، اسکن و ثبت کن.':!state.issuer.handed?'بسته ثبت‌شده را از پیشخوان به سارا تحویل بده.':!state.issuer.sent?'فیش‌ها را از رایانه ارسال کن.':!state.issuer.receiptTaken?'رسید پیگیری را چاپ کن و بردار.':!state.issuer.published?'زمان و وضعیت را بررسی و طرح را منتشر کن.':'به مرکز مشارکت برو.'):inOffice(state)?(!state.office.reviewed?'پرونده را بررسی، تطبیق و اسکن کن.':!state.office.handed?'بسته نتیجه را از میز بررسی به نادر تحویل بده.':'در نقش نادر از در خروج به گلخانه برو.'):node.objective||'';
  $('trust').textContent=fa(state.trust);$('time').textContent=fa(state.time);$('balance').textContent=fa(state.balance);
  $('trust-bar').style.width=state.trust+'%';$('time-bar').style.width=state.time+'%';
  $('balance-label').textContent='ظرفیت آزاد طرح';
@@ -86,6 +94,8 @@ function updateHUD(){
  $('actor-portrait').src=actor.portrait;$('actor-portrait').alt=actor.name;$('actor-name').textContent=actor.name+' · '+actor.role;
  $('challenge-progress').textContent='مرحله '+fa(progress.chapter.id)+' از ۱۰ · چالش‌های حل‌شده '+fa(progress.done)+' از '+fa(progress.total);
  $('chapter-progress').style.width=(progress.completedChapters/10*100)+'%';
+ if(inCompletion(state))$('challenge-progress').textContent='محیط ۵ از ۶ · قرارداد و صدور اسناد';
+ if(inOperations(state))$('challenge-progress').textContent='محیط ۴ از ۶ · مرکز عملیات مالی';
  if(inParticipation(state))$('challenge-progress').textContent='محیط ۳ از ۶ · خانه مشارکت';
  if(inIssuer(state))$('challenge-progress').textContent='محیط ۲ از ۶ · پایگاه گلخانه';
  if(inOffice(state))$('challenge-progress').textContent='محیط ۱ از ۶ · دفتر طرح';
@@ -102,17 +112,21 @@ async function enterJourney(resume=false,environmentId=null){
  if(dialog.open)closeDialog();
  if(!environmentId)testSession.leave();
  const officeMigrated=resume&&saved&&!saved.office&&['project','window'].includes(saved.nodeId);
- state=environmentId?testSession.enter(environmentId==='natural'?'naturalIdentity':environmentId==='issuer'?'ownerIdentity':environmentId==='office'?'project':environmentId):(resume&&saved?saved:newJourney());
+ state=environmentId?testSession.enter(environmentId==='completion'?'legalIdentity':environmentId==='operations'?'verifyBank':environmentId==='natural'?'naturalIdentity':environmentId==='issuer'?'ownerIdentity':environmentId==='office'?'project':environmentId):(resume&&saved?saved:newJourney());
  if(environmentId==='office'||(!resume&&!environmentId)||officeMigrated)state=officeAct(state,'begin');
  if((environmentId==='issuer'||resume&&saved?.nodeId==='ownerIdentity'&&!saved?.issuer&&!inOffice(state))&&!state.issuer)state=issuerAct(state,'begin');
  if((environmentId==='natural'||resume&&saved?.nodeId==='naturalIdentity'&&!saved?.participation&&!inIssuer(state))&&!state.participation)state=participationAct(state,'begin');
+ if((environmentId==='operations'||resume&&saved?.nodeId==='verifyBank'&&!saved?.operations&&!inParticipation(state))&&!state.operations)state=operationsAct(state,'begin');
+ if((environmentId==='completion'||resume&&saved?.nodeId==='legalIdentity'&&!saved?.completion&&!inOperations(state))&&!state.completion)state=completionAct(state,'begin');
+ completionDevice=null;completionJobClock=0;
+ operationsDevice=null;operationsJobClock=0;
  participationDevice=null;participationJobClock=0;
  issuerDevice=null;issuerJobClock=0;
  officeDevice=null;officeScanClock=0;officeHandoffClock=0;
  mode='menu';collection=null;transition=null;keys.clear();setRouteSeed(state.id);renderer.invalidateLayout();
  document.querySelectorAll('[data-test-environment]').forEach(button=>button.disabled=true);
  const startLabel=$('start').innerHTML;$('start').disabled=$('continue').disabled=true;$('start').textContent='آماده‌سازی اتاق‌ها…';
- try{await renderer.prepareLocationFamily(inParticipation(state)?participationNode:inIssuer(state)?issuerNode:currentNode());}catch(error){console.error(error);menu();toast('آماده‌سازی محیط کامل نشد؛ دوباره تلاش کن.');return;}
+ try{await renderer.prepareLocationFamily(inCompletion(state)?completionNode:inOperations(state)?operationsNode:inParticipation(state)?participationNode:inIssuer(state)?issuerNode:currentNode());}catch(error){console.error(error);menu();toast('آماده‌سازی محیط کامل نشد؛ دوباره تلاش کن.');return;}
  finally{document.querySelectorAll('[data-test-environment]').forEach(button=>button.disabled=false);$('start').innerHTML=startLabel;$('start').disabled=$('continue').disabled=false;entering=false;lastTime=performance.now();}
  const arrival=archiveArrival(state,currentLayout());player={...(arrival.position||START),facing:'up',moving:false};
  if(resume&&!officeMigrated&&savedPosition&&Number.isFinite(savedPosition.x)&&Number.isFinite(savedPosition.y)&&walkable(savedPosition,currentLayout(),10))player={...player,...savedPosition};
@@ -122,6 +136,12 @@ async function enterJourney(resume=false,environmentId=null){
  else if(!resume&&!environmentId&&!inOffice(state)&&!inIssuer(state))openDialog('یک طرح، چهار شخصیت، ده مرحله','<p>از پرونده فرابورس تا اولین پرداخت سود پیش می‌روی. نقش تو با پیشرفت داستان خودکار تغییر می‌کند.</p><p>در هر مأموریت، مدرک روی میز را با E بردار؛ سپس با W A S D و نگاه با موس از ورودی تصمیم عبور کن. هر مرحله چالش اجباری دارد. مسیر اشتباه به بازبینی و اصلاح برمی‌گردد.</p><p>مبالغ، پرداخت‌ها و پاسخ‌ها ساختگی و محلی‌اند. اعداد مالی میلیون تومان‌اند.</p>');
  else canvas.focus({preventScroll:true});
 }
+function paintCompletionPanel(){if(!completionDevice||!inCompletion(state))return;const p=completionPanel(state,completionDevice);dialog.dataset.officeStation=completionDevice;dialog.dataset.environment='completion';dialog.classList.toggle('office-guide',Boolean(p.guide));dialog.classList.toggle('office-device',!p.guide);openDialog(p.title,p.body,[{label:p.guide?'پایان گفت‌وگو':'پایان کار با وسیله',action:'close'}]);}
+function performCompletion(action,value,repaint=true){try{if(action==='handoff')value={recipient:value,origin:handoffOrigin()};const oldJob=state.completion.job,oldRole=state.role;state=completionAct(state,action,value);if(action==='handoff-finish'){const target=oldJob.target;player={...player,x:640+target.x*10,y:450+target.z*10,moving:false};renderer.resetCamera({yaw:target.yaw,pitch:-.08});path=[];keys.clear();}if(state.completion.job?.kind!==oldJob?.kind)completionJobClock=0;save();if(!repaint)return;updateHUD();tone(action.endsWith('finish')?659:440,.08);if(dialog.open)paintCompletionPanel();if(['handoff','place-plan','take-company','store-company','load','unload','scan','treasury','take-receipt','sign','assemble','collect-package','send','responses','print','emboss','collect-certificate','store-certificate'].includes(action)&&dialog.open)closeDialog();if(oldRole!==state.role){const actor=characters[state.role];$('role-card-image').src=actor.portrait;$('role-card-title').textContent='حالا '+actor.name+' هستی';$('role-card-detail').textContent=actor.role;roleCardUntil=time+5;}}catch(error){const body=dialog.querySelector('.dialog-body');if(body){let status=body.querySelector('.completion-error');if(!status){status=document.createElement('p');status.className='office-status completion-error';status.setAttribute('role','alert');body.append(status);}status.textContent=error.message;}else toast(error.message);}}
+function inspectCompletion(entry){if(mode!=='play'||dialog.open||transition)return;if(entry.object.id==='exit'&&state.completion.phase===4){startTravel('completion-leave');return;}completionDevice=entry.object.id;paintCompletionPanel();}
+function paintOperationsPanel(){if(!operationsDevice||!inOperations(state))return;const p=operationsPanel(state,operationsDevice);dialog.dataset.officeStation=operationsDevice;dialog.dataset.environment='operations';dialog.classList.toggle('office-guide',Boolean(p.guide));dialog.classList.toggle('office-device',!p.guide);openDialog(p.title,p.body,[{label:p.guide?'پایان گفت‌وگو':'پایان کار با وسیله',action:'close'}]);}
+function performOperations(action,value){try{const job=state.operations.job;state=operationsAct(state,action,value);if(state.operations.job?.kind!==job?.kind)operationsJobClock=0;save();updateHUD();tone(action.endsWith('finish')?659:440,.08);if(dialog.open)paintOperationsPanel();if(['intake','take','load','unload','bank','scan','query','send','print','collect-report','collect-case'].includes(action)&&dialog.open)closeDialog();}catch(error){toast(error.message);}}
+function inspectOperations(entry){if(mode!=='play'||dialog.open||transition)return;if(entry.object.id==='exit'&&state.operations.held==='completed-case'){startTravel('operations-leave');return;}operationsDevice=entry.object.id;paintOperationsPanel();}
 function paintParticipationPanel(){if(!participationDevice||!inParticipation(state))return;const p=participationPanel(state,participationDevice);dialog.dataset.officeStation=participationDevice;dialog.dataset.environment='participation';dialog.classList.toggle('office-guide',Boolean(p.guide));dialog.classList.toggle('office-device',!p.guide);openDialog(p.title,p.body,[{label:p.guide?'پایان گفت‌وگو':'پایان کار با وسیله',action:'close'}]);}
 function performParticipation(action,value,repaint=true){try{if(action==='handoff'&&value===undefined)value=handoffOrigin();const previousRole=state.role,oldJob=state.participation.job;state=participationAct(state,action,value);if(action==='handoff-finish')finishRoleExchange('participation');if(state.participation.job?.kind!==oldJob?.kind)participationJobClock=0;save();if(!repaint)return;updateHUD();tone(action.endsWith('finish')?659:440,.08);if(dialog.open)paintParticipationPanel();if(['collect-case','scan','otp','gateway','print','pickup','handoff'].includes(action)&&dialog.open)closeDialog();if(previousRole!==state.role){const actor=characters[state.role];$('role-card-image').src=actor.portrait;$('role-card-title').textContent='حالا '+actor.name+' هستی';$('role-card-detail').textContent=actor.role;roleCardUntil=time+5;}}catch(error){const body=dialog.querySelector('.dialog-body');if(body){let status=body.querySelector('.participation-error');if(!status){status=document.createElement('p');status.className='office-status participation-error';body.append(status);}status.textContent=error.message;}else toast(error.message);}}
 function inspectParticipation(entry){if(mode!=='play'||dialog.open||transition)return;if(entry.object.id==='exit'&&state.participation.handed){startTravel('participation-leave');return;}participationDevice=entry.object.id;paintParticipationPanel();}
@@ -146,9 +166,11 @@ function inspectOffice(entry){
 }
 function beginCollection(entry,review=false){
  show('interact',false);show('route-hint',false);
- path=[];keys.clear();player.moving=false;const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;const style=(currentNode().scene?.participationRoom||currentNode().scene?.issuerRoom||currentNode().scene?.officeRoom||currentNode().scene?.archiveRoom||currentNode().scene?.calendarRoom||currentNode().scene?.workshopRoom||currentNode().scene?.canalRoom||currentNode().scene?.postalRoom||currentNode().scene?.atriumRoom||currentNode().scene?.receptionRoom||currentNode().scene?.auditRoom||currentNode().scene?.bankRoom||currentNode().scene?.paymentRoom||currentNode().scene?.orchardRoom)?'archive':'legacy';renderer.collect(entry,{reduced,review,style});collection={entry,elapsed:0,reduced,review,style};
+ path=[];keys.clear();player.moving=false;const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;const style=(currentNode().scene?.completionRoom||currentNode().scene?.operationsRoom||currentNode().scene?.participationRoom||currentNode().scene?.issuerRoom||currentNode().scene?.officeRoom||currentNode().scene?.archiveRoom||currentNode().scene?.calendarRoom||currentNode().scene?.workshopRoom||currentNode().scene?.canalRoom||currentNode().scene?.postalRoom||currentNode().scene?.atriumRoom||currentNode().scene?.receptionRoom||currentNode().scene?.auditRoom||currentNode().scene?.bankRoom||currentNode().scene?.paymentRoom||currentNode().scene?.orchardRoom)?'archive':'legacy';renderer.collect(entry,{reduced,review,style});collection={entry,elapsed:0,reduced,review,style};
 }
 function inspectObject(entry){
+ if(inCompletion(state)){inspectCompletion(entry);return;}
+ if(inOperations(state)){inspectOperations(entry);return;}
  if(inParticipation(state)){inspectParticipation(entry);return;}
  if(inIssuer(state)){inspectIssuer(entry);return;}
  if(inOffice(state)){inspectOffice(entry);return;}
@@ -164,9 +186,11 @@ function inspectObject(entry){
  openDialog(entry.object.name,documentBody(entry.object.text)+(entry.object.grant?'<div class="collected">✦ '+itemLabel(entry.object.grant)+' در کوله‌پشتی توست.</div>':''),entry.object.grant?[{label:'در دست بگیر',action:'held-inspect',primary:true},{label:'ادامه مسیر',action:'close'}]:[{label:'ادامه مسیر',action:'close',primary:true}]);
 }
 function nearestObject(){
- return currentLayout().objects.filter(o=>!(inParticipation(state)&&state.participation.handed&&o.object.id==='sara')).filter(o=>!(inOffice(state)&&state.office.handed&&o.object.id==='nader')&&!(inIssuer(state)&&state.issuer.handed&&o.object.id==='sara')).filter(o=>renderer.isFirstPerson?renderer.canInspect(player,o):distance(player,o)<92).sort((a,b)=>interactionDistance(player,a)-interactionDistance(player,b))[0];
+ return currentLayout().objects.filter(o=>!(inParticipation(state)&&state.participation.handed&&o.object.id==='sara')).filter(o=>!(inOffice(state)&&state.office.handed&&o.object.id==='nader')&&!(inIssuer(state)&&state.issuer.handed&&o.object.id==='sara')).filter(o=>renderer.isFirstPerson?renderer.canInspect(player,o):distance(player,o)<92).sort((a,b)=>(inCompletion(state)?completionInteractionRank(state.completion,a.object.id)-completionInteractionRank(state.completion,b.object.id):0)||interactionDistance(player,a)-interactionDistance(player,b))[0];
 }
 function prepareAdjacentRooms(){
+ if(inCompletion(state)){entering=true;renderer.prepareLocationFamily(completionNode).catch(console.error).finally(()=>{entering=false;lastTime=performance.now();});return;}
+ if(inOperations(state)){entering=true;renderer.prepareLocationFamily(operationsNode).catch(console.error).finally(()=>{entering=false;lastTime=performance.now();});return;}
  if(inParticipation(state)){entering=true;renderer.prepareLocationFamily(participationNode).catch(console.error).finally(()=>{entering=false;lastTime=performance.now();});return;}
  if(inIssuer(state)){entering=true;renderer.prepareLocationFamily(issuerNode).catch(console.error).finally(()=>{entering=false;lastTime=performance.now();});return;}
  if(!['window','ownerIdentity','ownerAmount','ownerSend','publish','naturalIdentity','naturalSlip','gateway','verifyBank','receiptCheck'].includes(currentNode().id))return;entering=true;keys.clear();player.moving=false;
@@ -175,8 +199,8 @@ function prepareAdjacentRooms(){
 function startTravel(id){
  if(entering||transition||dialog.open||mode!=='play')return;
  try{
-  const next=inParticipation(state)?participationAct(state,'leave'):inIssuer(state)?participationAct(issuerAct(state,'leave'),'begin'):inOffice(state)?issuerAct(officeAct(state,'leave'),'begin'):travel(state,id);
-  tone(659,.2);transition={elapsed:0,next,previousRole:state.role,swapped:false,door:(currentNode().scene?.participationRoom||currentNode().scene?.issuerRoom||currentNode().scene?.officeRoom||currentNode().scene?.archiveRoom||currentNode().scene?.calendarRoom||currentNode().scene?.workshopRoom||currentNode().scene?.canalRoom||currentNode().scene?.postalRoom||currentNode().scene?.atriumRoom||currentNode().scene?.receptionRoom||currentNode().scene?.auditRoom||currentNode().scene?.bankRoom||currentNode().scene?.paymentRoom||currentNode().scene?.orchardRoom)?{gate:currentLayout().gates.find(g=>g.exit.id===id),start:{...player},reduced:matchMedia('(prefers-reduced-motion: reduce)').matches}:null};path=[];pendingObject=null;hold=null;player.moving=false;keys.clear();
+  const next=inCompletion(state)?completionAct(state,'leave'):inOperations(state)?completionAct(operationsAct(state,'leave'),'begin'):inParticipation(state)?operationsAct(participationAct(state,'leave'),'begin'):inIssuer(state)?participationAct(issuerAct(state,'leave'),'begin'):inOffice(state)?issuerAct(officeAct(state,'leave'),'begin'):travel(state,id);
+  tone(659,.2);transition={elapsed:0,next,previousRole:state.role,swapped:false,door:(currentNode().scene?.completionRoom||currentNode().scene?.operationsRoom||currentNode().scene?.participationRoom||currentNode().scene?.issuerRoom||currentNode().scene?.officeRoom||currentNode().scene?.archiveRoom||currentNode().scene?.calendarRoom||currentNode().scene?.workshopRoom||currentNode().scene?.canalRoom||currentNode().scene?.postalRoom||currentNode().scene?.atriumRoom||currentNode().scene?.receptionRoom||currentNode().scene?.auditRoom||currentNode().scene?.bankRoom||currentNode().scene?.paymentRoom||currentNode().scene?.orchardRoom)?{gate:currentLayout().gates.find(g=>g.exit.id===id),start:{...player},reduced:matchMedia('(prefers-reduced-motion: reduce)').matches}:null};path=[];pendingObject=null;hold=null;player.moving=false;keys.clear();
   show('route-hint',false);show('interact',false);
  }catch(error){toast(error.message);}
 }
@@ -198,6 +222,8 @@ function casebook(){
  return '<div class="casebook"><h3>دفتر همین طرح</h3><p>وضعیت فرابورس: '+status+' · ورود سرمایه‌گذار: '+(ledger.published&&ledger.ownerSent?'باز':'بسته')+' · تعهد مجری: '+(ledger.ownerSent?'ارسال موفق':ledger.ownerReceipts.length?'ثبت فیش؛ ارسال نشده':'ثبت نشده')+'</p><p>گواهی: '+(ledger.certificate?'صادرشده به نام آرمان':'هنوز صادر نشده')+' · سود پرداخت‌شده: '+fa(ledger.interestPayments.reduce((s,p)=>s+p.amount,0))+' میلیون تومان</p><ul>'+ledger.payments.map(p=>'<li><strong>'+esc(p.id)+' · '+fa(p.amount)+' میلیون</strong><br>'+labels[p.status]+(p.trace?' · پیگیری '+esc(p.trace):'')+'</li>').join('')+'</ul><p>در تقویم: '+fa(ledger.schedule.length)+' سررسید؛ پرداخت واقعی: '+fa(ledger.schedule.filter(r=>r.paid).length)+' سررسید.</p></div>';
 }
 function journal(mapOnly=false){
+ if(inCompletion(state)){openDialog('پرونده قرارداد و صدور اسناد','<p>'+completionObjective(state)+'</p><ul>'+[['هویت شرکت بهار',state.completion.identity],['خرید حقوقی',state.completion.receiptReady],['ارسال فیش شرکت',state.completion.sent],['بستن جمع‌آوری',state.completion.closed],['تأیید نهایی ۱۵',state.completion.final],['اصل گواهی نزد آرمان',state.completion.certificateStored],['تأیید دریافت',state.completion.ackSigned]].map(([label,done])=>'<li>'+label+' · '+(done?'ثبت‌شده':'—')+'</li>').join('')+'</ul>');return;}
+ if(inOperations(state)){openDialog('پرونده تطبیق مالی','<ul>'+[['بانک N-80',state.operations.bankVerified],['اعتبار فیش N-200',state.operations.receiptVerified],['ثبت قبلی FB-80',state.operations.onlineTrace],['ارسال FB-200',state.operations.slipTrace],['تکمیل پرونده',state.operations.assembled]].map(([label,done])=>'<li>'+label+' · '+(done?'ثبت‌شده':'—')+'</li>').join('')+'</ul>');return;}
  if(inParticipation(state)){openDialog('دفتر مشارکت آرمان','<ul>'+[['هویت',state.participation.identity],['خرید اول · ۲۰۰ میلیون',state.participation.firstRegistered],['درخواست N-80 · در انتظار بانک',state.participation.requested],['رسید درخواست',state.participation.receiptCollected],['تحویل مدارک به سارا',state.participation.handed]].map(([label,done])=>'<li>'+label+' · '+(done?'ثبت‌شده':'—')+'</li>').join('')+'</ul>');return;}
  if(inIssuer(state)){openDialog('پرونده تعهد آفتاب','<p>پایگاه اجرایی · '+characters[state.role].name+'</p><ul>'+[['هویت مجری',state.issuer.identity],['محاسبه تعهد',state.issuer.calculated],['ثبت دو فیش',state.issuer.registered],['تحویل به سارا',state.issuer.handed],['ارسال موفق',state.issuer.sent],['رسید پیگیری',state.issuer.receiptTaken],['انتشار طرح',state.issuer.published]].map(([label,done])=>'<li>'+label+' · '+(done?'ثبت‌شده':'—')+'</li>').join('')+'</ul>');return;}
  if(inOffice(state)){openDialog('دفتر پرونده','<p>گلخانه آفتاب · شرکت آفتاب</p><ul>'+[['نامه راهنما · اختیاری',state.office.referral],['تطبیق اطلاعات',state.office.matched],['پیوست تصویر',state.office.attached],['بازبینی زمان',state.office.reviewed],['تحویل نتیجه',state.office.handed]].map(([label,done])=>'<li>'+esc(label)+' · '+(done?'ثبت‌شده':'—')+'</li>').join('')+'</ul>');return;}
@@ -209,7 +235,7 @@ function pause(){
  openDialog('کمی در سایه استراحت کن',(testSession.active?'<p>حالت تست محیط؛ سفر اصلی تغییری نمی‌کند.</p>':'<p>سفر ذخیره شده است.</p>')+'<p>تا بازگشت تو، کاراکتر و چرخ‌دستی‌ها متوقف می‌مانند.</p><p>روانی فعلی: '+(measuredFps?fa(measuredFps)+' فریم در ثانیه':'در حال اندازه‌گیری')+'</p><p>وضوح صحنه: '+fa(Math.round(renderer.getRenderScale()*100))+'٪؛ در حالت روان، خودکار با توان دستگاه هماهنگ می‌شود.</p>',[{label:'ادامه سفر',action:'close',primary:true},{label:'بازگشت به منو',action:'menu'},{label:highQuality?'کیفیت بالا؛ تغییر به اجرای روان‌تر':'اجرای روان‌تر؛ تغییر به کیفیت بالا',action:'quality'},{label:'تمام‌صفحه',action:'fullscreen'}]);save();
 }
 function help(){
- if(inParticipation(state)||inIssuer(state)||inOffice(state)||mode==='menu'){openDialog('کنترل‌ها','<p>W A S D: حرکت · چپ و راست: چرخش · PageUp و PageDown: نگاه بالا و پایین · E: کار یا گفت‌وگو</p><p>داخل پنل: Tab یا جهت‌ها برای انتخاب؛ E، Enter یا فاصله برای اجرا و تیک‌زدن؛ Escape برای بستن. استفاده از موس اختیاری است.</p><p>R یا دکمه بررسی مدرک: نزدیک‌آوردن مدرک در دست برای خواندن. با شروع حرکت، آن را پایین می‌آوری تا مسیر دیده شود.</p>');return;}
+ if(inCompletion(state)||inOperations(state)||inParticipation(state)||inIssuer(state)||inOffice(state)||mode==='menu'){openDialog('کنترل‌ها','<p>W A S D: حرکت · چپ و راست: چرخش · PageUp و PageDown: نگاه بالا و پایین · E: کار یا گفت‌وگو</p><p>داخل پنل: Tab یا جهت‌ها برای انتخاب؛ E، Enter یا فاصله برای اجرا و تیک‌زدن؛ Escape برای بستن. استفاده از موس اختیاری است.</p><p>R یا دکمه بررسی مدرک: نزدیک‌آوردن مدرک در دست برای خواندن. با شروع حرکت، آن را پایین می‌آوری تا مسیر دیده شود.</p>');return;}
  openDialog('کنترل مسیر، دست توست','<ul><li>حرکت: کلیدهای جهت یا W A S D.</li><li>نگاه با موس: روی محیط کلیک کن. اگر قفل موس در دسترس نبود، دکمه چپ را نگه دار و موس را حرکت بده.</li><li>بررسی: به شیء نزدیک شو، به سمت آن نگاه کن و E یا فاصله را بزن.</li><li>انتخاب مسیر: وارد دروازه شو. نزدیک مرکز دروازه برو؛ تصمیم هنگام عبور ثبت می‌شود.</li><li>درِ بسته: مدرک لازم را از میزهای همین داستان پیدا کن.</li><li>چرخ‌دستی: برخورد سه واحد از فرصت روز کم می‌کند؛ می‌توانی کنار جاده صبر کنی.</li><li>چرخش با کیبورد: جهت چپ و راست. حرکت: W A S D.</li><li>نمای محیط بدون رابط: H. دفتر سفر: M. توقف: Escape.</li></ul><p>زمان خواندن مدارک، فرصت روز را کم نمی‌کند. فقط انتخاب راه و برخورد اثر دارد. این نسخه برای کیبورد و موس طراحی شده؛ دید اول‌شخص است. با Escape موس آزاد می‌شود.</p>');
 }
 canvas.addEventListener('pointerdown',event=>{
@@ -229,7 +255,7 @@ document.addEventListener('keydown',event=>{
  if(event.ctrlKey||event.metaKey||event.altKey)return;
  if(dialog.open){if(inIssuer(state)&&issuerDevice==='calculator'&&!event.repeat&&/^[0-9.+\-*/%=]$/.test(event.key)){event.preventDefault();performIssuer('key',event.key);return;}dialogKey(event,dialog);return;}
  if(event.code==='Escape'){event.preventDefault();pause();return;}
- if(mode!=='play'||transition||collection||state.office?.handoffPending||state.issuer?.job?.kind==='handoff'||state.participation?.job?.kind==='handoff')return;
+ if(mode!=='play'||transition||collection||state.office?.handoffPending||state.issuer?.job?.kind==='handoff'||state.participation?.job?.kind==='handoff'||['handoff','sign','emboss'].includes(state.completion?.job?.kind))return;
  if(event.target.closest?.('button,input,textarea,select'))return;
  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD','PageUp','PageDown'].includes(event.code)){
   event.preventDefault();if(['ArrowUp','ArrowDown','KeyW','KeyA','KeyS','KeyD'].includes(event.code))readingHeld=false;keys.add(event.code);path=[];pendingObject=null;canvas.focus({preventScroll:true});
@@ -252,9 +278,11 @@ $('sound').onclick=()=>{
  $('sound').setAttribute('aria-label',soundEnabled?'خاموش کردن صدای بازی':'روشن کردن صدای بازی');tone(523,.15);
 };
 $('pause').onclick=pause;$('brand').onclick=pause;$('help').onclick=help;$('map').onclick=()=>journal(true);$('journal').onclick=()=>journal();$('interact').onclick=()=>{const object=nearestObject();if(object)inspectObject(object);};
-dialog.addEventListener('input',event=>{const name=event.target.dataset.participationField;if(!name||!inParticipation(state))return;performParticipation('field',{name,value:event.target.value},false);const preview=dialog.querySelector('.participation-preview');if(preview)preview.textContent=fa(Number(state.participation.units||0)*10)+' میلیون تومان';});
-dialog.addEventListener('change',event=>{const issuerCheck=event.target.dataset.issuerCheck;if(issuerCheck&&inIssuer(state)){performIssuer('select-slip',issuerCheck);return;}const key=event.target.dataset.officeCheck;if(key&&inOffice(state))performOffice(key==='public'?'public':'check',key==='public'?undefined:key);});
+dialog.addEventListener('input',event=>{const completionField=event.target.dataset.completionField;if(completionField&&inCompletion(state)){performCompletion('field',{name:completionField,value:event.target.value},false);return;}const name=event.target.dataset.participationField;if(!name||!inParticipation(state))return;performParticipation('field',{name,value:event.target.value},false);const preview=dialog.querySelector('.participation-preview');if(preview)preview.textContent=fa(Number(state.participation.units||0)*10)+' میلیون تومان';});
+dialog.addEventListener('change',event=>{const completionCheck=event.target.dataset.completionCheck,completionApproval=event.target.dataset.completionApproval;if(inCompletion(state)&&(completionCheck||completionApproval)){performCompletion(completionCheck?'company-check':'approval-check',completionCheck||completionApproval);return;}const operationsCheck=event.target.dataset.operationsCheck;if(operationsCheck&&inOperations(state)){performOperations('check',operationsCheck);return;}const issuerCheck=event.target.dataset.issuerCheck;if(issuerCheck&&inIssuer(state)){performIssuer('select-slip',issuerCheck);return;}const key=event.target.dataset.officeCheck;if(key&&inOffice(state))performOffice(key==='public'?'public':'check',key==='public'?undefined:key);});
 dialog.addEventListener('click',event=>{
+ const completionOperation=event.target.closest('[data-completion]');if(completionOperation&&inCompletion(state)){performCompletion(completionOperation.dataset.completion,completionOperation.dataset.completionValue);return;}
+ const operationsOperation=event.target.closest('[data-operations]');if(operationsOperation&&inOperations(state)){performOperations(operationsOperation.dataset.operations,operationsOperation.dataset.operationsValue);return;}
  const participationOperation=event.target.closest('[data-participation]');if(participationOperation&&inParticipation(state)){performParticipation(participationOperation.dataset.participation,participationOperation.dataset.participationValue);return;}
  const issuerOperation=event.target.closest('[data-issuer]');if(issuerOperation&&inIssuer(state)){performIssuer(issuerOperation.dataset.issuer,issuerOperation.dataset.issuerValue);return;}
  const operation=event.target.closest('[data-office]');if(operation&&inOffice(state)){performOffice(operation.dataset.office,operation.dataset.officeValue);return;}
@@ -271,12 +299,14 @@ dialog.addEventListener('click',event=>{
 dialog.addEventListener('cancel',event=>{event.preventDefault();closeDialog();});
 $('ending-screen').addEventListener('click',event=>{const action=event.target.closest('[data-end]')?.dataset.end;if(action==='new')menu();else if(action==='journal')journal();});
 function update(dt){
+ if(inCompletion(state)&&mode==='play'&&state.completion.job&&!document.hidden&&(!dialog.open||dialog.dataset.environment==='completion')&&(state.completion.job.kind!=='handoff'||!dialog.open)){completionJobClock+=dt;const progress=dialog.querySelector('.completion-progress'),duration=completionDurations[state.completion.job.kind];if(progress)progress.value=completionJobClock/duration;if(completionJobClock>=duration){const action=state.completion.job.kind+'-finish';completionJobClock=0;performCompletion(action);}}
+ if(inOperations(state)&&mode==='play'&&state.operations.job&&!document.hidden&&(!dialog.open||dialog.dataset.environment==='operations')){operationsJobClock+=dt;const progress=dialog.querySelector('.operations-progress'),duration=operationsDurations[state.operations.job.kind];if(progress)progress.value=operationsJobClock/duration;if(operationsJobClock>=duration){const action=state.operations.job.kind+'-finish';operationsJobClock=0;performOperations(action);}}
  if(inOffice(state)&&mode==='play'&&state.office.handoffPending&&!document.hidden&&!dialog.open){officeHandoffClock+=dt;if(officeHandoffClock>=roleExchanges.office.duration){performOffice('handoff-finish');officeHandoffClock=0;}}
  if(inParticipation(state)&&mode==='play'&&state.participation.job&&!document.hidden&&(!dialog.open||dialog.dataset.environment==='participation')&&(state.participation.job.kind!=='handoff'||!dialog.open)){participationJobClock+=dt;const progress=dialog.querySelector('.participation-progress'),duration=participationDurations[state.participation.job.kind];if(progress)progress.value=participationJobClock/duration;if(participationJobClock>=duration){const action=state.participation.job.kind+'-finish';participationJobClock=0;performParticipation(action);}}
  if(inIssuer(state)&&mode==='play'&&state.issuer.job&&!document.hidden&&(state.issuer.job.kind!=='handoff'||!dialog.open)){issuerJobClock+=dt;const progress=dialog.querySelector('.issuer-progress'),duration=issuerJobDurations[state.issuer.job.kind];if(progress)progress.value=issuerJobClock/duration;if(issuerJobClock>=duration){const action=state.issuer.job.kind+'-finish';issuerJobClock=0;performIssuer(action);}}
 
  if(inOffice(state)&&mode==='play'&&state.office.scanning&&!document.hidden){officeScanClock+=dt;const progress=dialog.querySelector('.office-scan-progress');if(progress)progress.value=officeScanClock;if(officeScanClock>=2){officeScanClock=0;performOffice('scan-finish');}}
- if((inParticipation(state)&&state.participation.job?.kind==='handoff')||(inOffice(state)&&state.office.handoffPending)||(inIssuer(state)&&state.issuer.job?.kind==='handoff')){player.moving=false;keys.clear();show('interact',false);return;}
+ if((inCompletion(state)&&['handoff','sign','emboss'].includes(state.completion.job?.kind))||(inParticipation(state)&&state.participation.job?.kind==='handoff')||(inOffice(state)&&state.office.handoffPending)||(inIssuer(state)&&state.issuer.job?.kind==='handoff')){player.moving=false;keys.clear();show('interact',false);return;}
  if(entering){player.moving=false;return;}
  if(collection){
   player.moving=false;
@@ -315,7 +345,7 @@ function update(dt){
  }
  const object=nearestObject();show('interact',Boolean(object));
  if(object)$('interact').querySelector('span').textContent=object.object.name;
- if(inParticipation(state)||inIssuer(state)||inOffice(state)){show('route-hint',false);hold=null;if(time-lastSave>2){save();lastSave=time;}return;}
+ if(inCompletion(state)||inOperations(state)||inParticipation(state)||inIssuer(state)||inOffice(state)){show('route-hint',false);hold=null;if(time-lastSave>2){save();lastSave=time;}return;}
  const gate=layout.gates.filter(g=>distance(player,g)<152).sort((a,b)=>distance(player,a)-distance(player,b))[0];
  show('route-hint',Boolean(gate));
  if(gate){
@@ -342,7 +372,7 @@ function frame(){const now=performance.now();
  const fade=transition?(transition.door?doorJourneyPose(transition.elapsed,transition.door.reduced).fade:(transition.elapsed<.4?transition.elapsed/.4:Math.max(0,1-(transition.elapsed-.4)/.45))):0;
  $('travel-fade').style.opacity=String(fade);
  const held=carriedItem(state);if(held?.key!==lastHeldKey||player.moving||dialog.open||transition){readingHeld=false;lastHeldKey=held?.key;}$('game').classList.toggle('carrying',mode==='play'&&Boolean(held));show('held-read',mode==='play'&&!dialog.open&&Boolean(held));heldRead.setAttribute('aria-pressed',String(readingHeld));heldRead.textContent=readingHeld?'پایین‌آوردن مدرک R':'بررسی مدرک R';
- renderer.render({heldItemKey:held?.key??null,readingHeld,participationJobElapsed:participationJobClock,officeHandoffElapsed:officeHandoffClock,issuerJobElapsed:issuerJobClock,officeScanElapsed:officeScanClock,node:currentNode(),state,player,palette:characters[state.role],time,dt,target:path.at(-1),hold,mode:mode==='play'?'play':mode==='menu'?'menu':'ending',fade,paused:dialog.open||document.hidden,pickupElapsed:collection?.elapsed??null,doorTransit:transition?.door&&!transition.swapped?{id:transition.door.gate.exit.id,elapsed:transition.elapsed,reduced:transition.door.reduced}:null});
+ renderer.render({heldItemKey:held?.key??null,readingHeld,completionJobElapsed:completionJobClock,operationsJobElapsed:operationsJobClock,participationJobElapsed:participationJobClock,officeHandoffElapsed:officeHandoffClock,issuerJobElapsed:issuerJobClock,officeScanElapsed:officeScanClock,node:currentNode(),state,player,palette:characters[state.role],time,dt,target:path.at(-1),hold,mode:mode==='play'?'play':mode==='menu'?'menu':'ending',fade,paused:dialog.open||document.hidden,pickupElapsed:collection?.elapsed??null,doorTransit:transition?.door&&!transition.swapped?{id:transition.door.gate.exit.id,elapsed:transition.elapsed,reduced:transition.door.reduced}:null});
  requestAnimationFrame(frame);
 }
 if(loaded.error){show('storage-warning',true);$('storage-warning').textContent=loaded.error;}

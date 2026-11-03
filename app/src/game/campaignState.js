@@ -1,3 +1,5 @@
+import {completionAction} from './completionWorkflow.js';
+import {operationsAction} from './operationsWorkflow.js';
 import {participationAction} from './participationWorkflow.js';
 import {issuerAction as applyIssuerAction} from './issuerWorkflow.js';
 import {officeAction as applyOfficeAction} from './officeWorkflow.js';
@@ -110,6 +112,8 @@ export function travel(state,id){
  const destination=nodes[exit.next];requireRule(destination,'مقصد نامعتبر است.');
  return {...next,nodeId:exit.next,role:destination.role,balance:availableAmount(next.ledger),ending:destination.ending||null};
 }
+export function completionAct(state,action,value){return completionAction(state,action,value,{interact,travel});}
+export function operationsAct(state,action,value){return operationsAction(state,action,value,{interact,travel});}
 export function participationAct(state,action,value){return participationAction(state,action,value,{interact,travel});}
 export function issuerAct(state,action,value){return applyIssuerAction(state,action,value,{interact,travel});}
 export function officeAct(state,action,value){return applyOfficeAction(state,action,value,{interact,travel});}
@@ -125,6 +129,8 @@ export function restoreJourney(raw){
   if(event.kind==='inspect')state=interact(state,event.id);
   else if(event.kind==='travel')state=travel(state,event.id);
   else if(event.kind==='collision')state=collide(state);
+  else if(event.kind==='completion')state=completionAct(state,event.action,event.value);
+  else if(event.kind==='operations')state=operationsAct(state,event.action,event.value);
   else if(event.kind==='participation')state=participationAct(state,event.action,event.value);
   else if(event.kind==='issuer')state=issuerAct(state,event.action,event.value);
   else if(event.kind==='office')state=officeAct(state,event.action,event.value);
@@ -134,7 +140,7 @@ export function restoreJourney(raw){
 }
 const issuerLogLabels={identity:'هویت سرمایه‌پذیر تأیید شد',register:'دو فیش تعهد ثبت شدند','handoff-finish':'پرونده به سارا تحویل شد','send-finish':'ارسال موفق با شماره پیگیری',publish:'طرح برای مشارکت منتشر شد',leave:'ورود به مرحله مشارکت آرمان'};
 const participationLogLabels={identity:'هویت آرمان تأیید شد','register-first':'خرید فیشی ۲۰۰ میلیونی ثبت شد','gateway-finish':'درخواست درگاه ۸۰ میلیونی ثبت شد','handoff-finish':'مدارک دو خرید به سارا تحویل شد',leave:'ورود به تطبیق مالی'};
-export const journeyLog=state=>state.events.flatMap(e=>e.kind==='participation'&&participationLogLabels[e.action]?[{from:'خانه مشارکت آفتاب',label:participationLogLabels[e.action]}]:e.kind==='issuer'&&issuerLogLabels[e.action]?[{from:'پایگاه گلخانه آفتاب',label:issuerLogLabels[e.action]}]:e.kind==='travel'?[{from:nodes[e.node].title,label:nodes[e.node].exits.find(x=>x.id===e.id).label}]:e.kind==='office'&&['attach','leave'].includes(e.action)?[{from:'دفتر بررسی طرح',label:e.action==='attach'?'پرونده مبنا و تصویر آن ثبت شد':'بازبینی زمان؛ خرید بسته ماند'}]:[]);
+export const journeyLog=state=>state.events.flatMap(e=>e.kind==='completion'&&['handoff-finish','identity','treasury-finish','send-finish','close','final','accept-certificate','store-certificate','leave'].includes(e.action)?[{from:'پاویون قرارداد و صدور اسناد',label:({'handoff-finish':'مدرک حضوری تحویل و نقش عوض شد',identity:'هویت شرکت بهار تطبیق شد','treasury-finish':'خرید حقوقی ثبت شد','send-finish':'فقط L-600 ارسال شد',close:'جمع‌آوری بسته شد',final:'تأیید نهایی ۱۵ ثبت شد','accept-certificate':'گواهی ۲۸۰ میلیونی آرمان تطبیق شد','store-certificate':'اصل گواهی نزد آرمان ماند',leave:'تأیید دریافت به تعهدات رفت'})[e.action]}]:e.kind==='operations'&&['verify-bank','verify-receipt','query-finish','send-finish','assemble','leave'].includes(e.action)?[{from:'مرکز عملیات مالی',label:({'verify-bank':'بانک N-80 تطبیق شد','verify-receipt':'اصل فیش N-200 تأیید شد','query-finish':'ثبت قبلی FB-80 استعلام شد','send-finish':'فقط فیش N-200 ارسال شد',assemble:'گزارش دو خرید پیوست شد',leave:'ورود به قراردادها'})[e.action]}]:e.kind==='participation'&&participationLogLabels[e.action]?[{from:'خانه مشارکت آفتاب',label:participationLogLabels[e.action]}]:e.kind==='issuer'&&issuerLogLabels[e.action]?[{from:'پایگاه گلخانه آفتاب',label:issuerLogLabels[e.action]}]:e.kind==='travel'?[{from:nodes[e.node].title,label:nodes[e.node].exits.find(x=>x.id===e.id).label}]:e.kind==='office'&&['attach','leave'].includes(e.action)?[{from:'دفتر بررسی طرح',label:e.action==='attach'?'پرونده مبنا و تصویر آن ثبت شد':'بازبینی زمان؛ خرید بسته ماند'}]:[]);
 export const summary=state=>state.ending?endings[state.ending]:null;
 export function chapterProgress(state){
  const node=nodes[state.nodeId],required=challenges.filter(c=>c.chapter===node.chapter);
