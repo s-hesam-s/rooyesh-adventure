@@ -1,3 +1,4 @@
+import {participationAction} from './participationWorkflow.js';
 import {issuerAction as applyIssuerAction} from './issuerWorkflow.js';
 import {officeAction as applyOfficeAction} from './officeWorkflow.js';
 import {nodes,items,challenges,chapters,project,endings} from '../content/campaign.js';
@@ -109,6 +110,7 @@ export function travel(state,id){
  const destination=nodes[exit.next];requireRule(destination,'مقصد نامعتبر است.');
  return {...next,nodeId:exit.next,role:destination.role,balance:availableAmount(next.ledger),ending:destination.ending||null};
 }
+export function participationAct(state,action,value){return participationAction(state,action,value,{interact,travel});}
 export function issuerAct(state,action,value){return applyIssuerAction(state,action,value,{interact,travel});}
 export function officeAct(state,action,value){return applyOfficeAction(state,action,value,{interact,travel});}
 export function collide(state){
@@ -123,6 +125,7 @@ export function restoreJourney(raw){
   if(event.kind==='inspect')state=interact(state,event.id);
   else if(event.kind==='travel')state=travel(state,event.id);
   else if(event.kind==='collision')state=collide(state);
+  else if(event.kind==='participation')state=participationAct(state,event.action,event.value);
   else if(event.kind==='issuer')state=issuerAct(state,event.action,event.value);
   else if(event.kind==='office')state=officeAct(state,event.action,event.value);
   else throw new Error('رویداد ناشناخته است.');
@@ -130,7 +133,8 @@ export function restoreJourney(raw){
  return state;
 }
 const issuerLogLabels={identity:'هویت سرمایه‌پذیر تأیید شد',register:'دو فیش تعهد ثبت شدند','handoff-finish':'پرونده به سارا تحویل شد','send-finish':'ارسال موفق با شماره پیگیری',publish:'طرح برای مشارکت منتشر شد',leave:'ورود به مرحله مشارکت آرمان'};
-export const journeyLog=state=>state.events.flatMap(e=>e.kind==='issuer'&&issuerLogLabels[e.action]?[{from:'پایگاه گلخانه آفتاب',label:issuerLogLabels[e.action]}]:e.kind==='travel'?[{from:nodes[e.node].title,label:nodes[e.node].exits.find(x=>x.id===e.id).label}]:e.kind==='office'&&['attach','leave'].includes(e.action)?[{from:'دفتر بررسی طرح',label:e.action==='attach'?'پرونده مبنا و تصویر آن ثبت شد':'بازبینی زمان؛ خرید بسته ماند'}]:[]);
+const participationLogLabels={identity:'هویت آرمان تأیید شد','register-first':'خرید فیشی ۲۰۰ میلیونی ثبت شد','gateway-finish':'درخواست درگاه ۸۰ میلیونی ثبت شد','handoff-finish':'مدارک دو خرید به سارا تحویل شد',leave:'ورود به تطبیق مالی'};
+export const journeyLog=state=>state.events.flatMap(e=>e.kind==='participation'&&participationLogLabels[e.action]?[{from:'خانه مشارکت آفتاب',label:participationLogLabels[e.action]}]:e.kind==='issuer'&&issuerLogLabels[e.action]?[{from:'پایگاه گلخانه آفتاب',label:issuerLogLabels[e.action]}]:e.kind==='travel'?[{from:nodes[e.node].title,label:nodes[e.node].exits.find(x=>x.id===e.id).label}]:e.kind==='office'&&['attach','leave'].includes(e.action)?[{from:'دفتر بررسی طرح',label:e.action==='attach'?'پرونده مبنا و تصویر آن ثبت شد':'بازبینی زمان؛ خرید بسته ماند'}]:[]);
 export const summary=state=>state.ending?endings[state.ending]:null;
 export function chapterProgress(state){
  const node=nodes[state.nodeId],required=challenges.filter(c=>c.chapter===node.chapter);

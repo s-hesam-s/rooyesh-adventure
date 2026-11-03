@@ -1,3 +1,4 @@
+import {participationLayout} from './participationRoom.js';
 import {issuerLayout} from './issuerRoom.js';
 import {openFloorWalkable} from './openFloor.js';
 import {missionLayout} from '../content/missionScenes.js';
@@ -12,6 +13,7 @@ export function segmentDistance(p,a,b){
 const point=(x,y)=>({x,y});
 import {officeLayout} from './officeRoom.js';
 export function layoutFor(node){
+ if(node.scene?.participationRoom)return participationLayout();
  if(node.scene?.issuerRoom)return issuerLayout();
  if(node.scene?.officeRoom)return officeLayout();
  if(node.scene)return missionLayout(node);
