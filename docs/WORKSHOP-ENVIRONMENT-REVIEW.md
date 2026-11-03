@@ -2,7 +2,7 @@
 
 تاریخ: ۲۰۲۶-۱۰-۲۶
 
-مبنای طراحی: [مرجع ارتقای محیط‌ها](ENVIRONMENT-UPGRADE-REFERENCE.md). این سند درباره محیط `ownerIdentity` و اتاق‌های `repair-ownerIdentity-0` و `repair-ownerIdentity-1` است. محیط بعدی، `ownerAmount`، صرفاً برای ادامه معتبر سفر آماده می‌شود و ارتقای طراحی آن جزو این تحویل نیست.
+مبنای طراحی تاریخی: [مرجع پیش از ادغام شش محیط](history/ENVIRONMENT-UPGRADE-REFERENCE-before-six-environments.md). این سند درباره محیط `ownerIdentity` و اتاق‌های `repair-ownerIdentity-0` و `repair-ownerIdentity-1` نسخه قبلی است. در محدوده همان تحویل، محیط بعدی `ownerAmount` صرفاً برای ادامه معتبر سفر آماده شد و ارتقای طراحی آن جزو آن تحویل نبود.
 
 ## محیط و هویت مستقل
 

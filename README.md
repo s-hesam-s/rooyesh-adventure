@@ -2,9 +2,11 @@
 
 A Persian first-person 3D learning game about crowdfunding operations. Players explore workplaces, handle documents and equipment, and practice the responsibilities of a financial manager, an issuer representative, an individual investor, and a corporate investor.
 
-**Status:** playable prototype under active development. The business-rule campaign contains ten chapters and twenty decisions. Its physical experience is being consolidated into six distinct environments. The redesigned first office is playable; the second environment's design is approved; the remaining environments still use legacy implementations. The six-environment redesign is not complete.
+**Status:** playable prototype under active development. The business-rule campaign contains ten chapters and twenty decisions. Its physical experience is being consolidated into six distinct environments. The redesigned first office and issuer greenhouse are playable; the four later environments still use legacy implementations. The six-environment redesign is not complete.
 
 ![Redesigned first office](docs/office-current.png)
+
+![Issuer greenhouse and operations equipment](docs/issuer-current.png)
 
 ## Gameplay preview
 
@@ -28,7 +30,7 @@ Requires Node.js 22+ and a modern desktop browser with WebGL support. Runtime de
 
 Open http://127.0.0.1:4318 . On Windows, Start.cmd starts the same local server and opens the browser; Stop.cmd stops the process started by that launcher. The launcher uses runtime/node.exe when locally available, otherwise Node.js from PATH. The executable itself is excluded from source control.
 
-On the start screen choose the first office under direct environment testing to explore it without changing the main saved journey. Five future redesign destinations are visible but disabled. The legacy environment atlas remains a preview of the earlier version.
+On the start screen choose the first office under direct environment testing to explore it without changing the main saved journey. The issuer greenhouse also supports direct testing; four future redesign destinations are visible but disabled. The legacy environment atlas remains a preview of the earlier version.
 
 ## Controls
 
@@ -38,7 +40,7 @@ On the start screen choose the first office under direct environment testing to 
 - Inside a panel: Tab / Shift+Tab or arrows to navigate; E / Enter / Space to activate or toggle; Escape to close.
 - M: journal; Escape: pause; H: hide the HUD.
 
-The new office supports keyboard operation, contextual guide dialogue, camera-relative document carrying, multi-side desk/guide access, directional device access, animated drawers/folders, scanner movement and light, and computer feedback. Additional animation and character polish remain planned.
+The redesigned office and issuer environment support keyboard operation, contextual guide dialogue, camera-relative document carrying, multi-side desk/guide access, directional device access, animated drawers/folders, scanner movement and light, and computer feedback. The issuer environment adds a working calculator, separate receipt scans with paper feed, carried dossier handoff and role transfer, sending/response, animated printing and receipt pickup, and publication in one location. Additional animation and character polish remain planned.
 
 ## Implementation
 
@@ -64,9 +66,9 @@ For a fresh checkout, use the declared Node.js prerequisite, run `npm test`, the
 
     npm test
 
-The latest recorded local suite contains **339 passing tests**. It covers domain progression, invalid/duplicate actions, receipt and payment rules, replay/storage, movement/collision, assets, and scene/interaction regressions. Local browser checks also cover the office workflow and keyboard interactions. Other devices, complete redesign coverage, and measured educational outcomes are not implied.
+The latest recorded local suite contains **372 passing tests**. It covers domain progression, invalid/duplicate actions, receipt and payment rules, replay/storage, movement/collision, assets, and scene/interaction regressions. Local browser checks also cover the office workflow and keyboard interactions. Other devices, complete redesign coverage, and measured educational outcomes are not implied.
 
-Start with [the current development reference](docs/ENVIRONMENT-UPGRADE-REFERENCE.md), [interaction standards](docs/INTERACTION-STANDARD.md), and [the office review](docs/OFFICE-ENVIRONMENT-REVIEW.md). Older environment reports describe earlier iterations, including a retired wrong-door mechanic; they do not override the six-environment plan.
+Start with [the six-environment plan](docs/SIX-ENVIRONMENT-REALISTIC-WORKFLOW.md), [interaction standards](docs/INTERACTION-STANDARD.md), [the office review](docs/OFFICE-ENVIRONMENT-REVIEW.md), and [the issuer greenhouse review](docs/ISSUER-ENVIRONMENT-REVIEW.md). Detailed project memory is maintained separately in Obsidian. Older environment reports describe earlier iterations, including a retired wrong-door mechanic; they do not override the six-environment plan.
 
 ## Rights and third-party assets
 
@@ -74,7 +76,7 @@ Public availability does not grant a project-wide open-source license. Third-par
 
 ---
 
-بازی آموزشی مستقل برای تجربه عملی فرایند تأمین مالی جمعی است. نسخه فعلی قابل اجراست، اما بازطراحی شش محیط هنوز کامل نشده است. مرجع ادامه کار و وضعیت واقعی هر محیط در docs/ENVIRONMENT-UPGRADE-REFERENCE.md نگهداری می‌شود. تمام عملیات مالی ساختگی و محلی‌اند.
+بازی آموزشی مستقل برای تجربه عملی فرایند تأمین مالی جمعی است. نسخه فعلی قابل اجراست، اما بازطراحی شش محیط هنوز کامل نشده است. برنامه و وضعیت محیط‌ها در docs/SIX-ENVIRONMENT-REALISTIC-WORKFLOW.md و حافظه تفصیلی توسعه بیرون از مخزن در Obsidian نگهداری می‌شوند. تمام عملیات مالی ساختگی و محلی‌اند.
 
 ## Continuous integration
 
