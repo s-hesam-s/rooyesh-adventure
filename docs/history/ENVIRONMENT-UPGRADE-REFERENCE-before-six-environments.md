@@ -128,9 +128,9 @@
 
 ## روش ارجاع در سشن بعد
 
-مسیر این سند: `D:/Projects/RooyeshAdventure/docs/ENVIRONMENT-UPGRADE-REFERENCE.md`
+مسیر این نسخه تاریخی: `D:/Projects/RooyeshAdventure/docs/history/ENVIRONMENT-UPGRADE-REFERENCE-before-six-environments.md`
 
-متن پیشنهادی برای شروع: «ابتدا فایل D:/Projects/RooyeshAdventure/docs/ENVIRONMENT-UPGRADE-REFERENCE.md را بخوان، وضعیت محیط موردنظر را با کد جاری تطبیق بده و سپس در محدوده درخواست همین سشن ادامه بده.»
+این نسخه تاریخی مرجع ادامه طراحی جاری نیست. برنامه فعلی در [برنامه شش محیط](../SIX-ENVIRONMENT-REALISTIC-WORKFLOW.md) و حافظه تفصیلی در `D:/Obsidian/CodexKnowledge/10 Projects/RooyeshAdventure/RooyeshAdventure.md` قرار دارد.
 
 حافظه کمکی فقط به این فایل اشاره می‌کند؛ جدول و معیار کامل در همین سند نگهداری می‌شوند. تغییرات آتی این مرجع باید با درخواست کاربر یا در محدوده صریح کار جاری ثبت شوند.
 

@@ -1,3 +1,4 @@
+import {buildIssuerScene} from './issuerScene.js';
 import {buildOfficeScene} from './officeScene.js';
 import {buildAuditScene} from './auditScene.js';
 import {buildBankScene} from './bankScene.js';
@@ -15,6 +16,7 @@ import * as T from '../../vendor/three.module.js';
 
 /* Scene architecture uses shared geometry/material caches; only the active location is built. */
 export function buildMissionScene(parent,node,layout,h){
+ if(node.scene.issuerRoom)return buildIssuerScene(parent,node,layout,h);
  if(node.scene.officeRoom)return buildOfficeScene(parent,node,layout,h);
  if(node.scene.auditRoom)return buildAuditScene(parent,node,layout,h);
  if(node.scene.bankRoom)return buildBankScene(parent,node,layout,h);

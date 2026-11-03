@@ -100,8 +100,9 @@ export function buildDistinctGuide(root,identity,h){
   for(const side of [-1,1]){mesh(glasses,'rim-'+side,rim,metal,side*c.headWidth*.43,0,0);capsule(glasses,'temple-'+side,[side*.25,0,0],[side*(c.headWidth-.02),0,-c.headDepth*.85],.008,metal);}
   box(glasses,'bridge',metal,0,.015,0,.07,.014,.016);
  }
+ if(c.headscarf){const scarf=h.mat('#536977');ellipsoid(head,'scarf-back',scarf,0,.54,-.19,.43,.55,.27);for(const side of [-1,1])ellipsoid(head,'scarf-side-'+side,scarf,side*.35,.42,0,.13,.53,.3);ellipsoid(head,'scarf-crown',scarf,0,1.06,-.025,.43,.11,.39);curve(body,'scarf-neck',[[-.31,4.25,.21],[0,4.12,.36],[.31,4.25,.21]],.11,scarf);}
  if(c.age>40)for(const side of [-1,1])curve(head,'smile-line-'+side,[[side*.1,.49,c.headDepth*.96],[side*.14,.41,c.headDepth*.94],[side*.135,.36,c.headDepth*.91]],.004,lip);
- if(c.id==='officeNima')head.traverse(o=>{if(o.isMesh&&/^(eye-white|iris|pupil|eye-glint|ear-|inner-ear)/.test(o.name))o.scale.multiplyScalar(.82);});
+ if(['officeNima','issuerMina'].includes(c.id))head.traverse(o=>{if(o.isMesh&&/^(eye-white|iris|pupil|eye-glint|ear-|inner-ear)/.test(o.name))o.scale.multiplyScalar(.82);});
  body.userData.identity={id:c.id,gender:c.gender,skin:c.skin,shoulder:c.shoulder,waist:c.waist,headWidth:c.headWidth};
  return {root,body,head,headRest:head.rotation.clone(),baseScale:1};
 }

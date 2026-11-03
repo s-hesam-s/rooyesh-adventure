@@ -1,3 +1,4 @@
+import {exchangeOrigin} from './roleExchange.js';
 import {project} from '../content/campaign.js';
 export const officeFiles={
  working:{label:'آفتاب · پوشه ۲',title:'گلخانه آفتاب',owner:'شرکت آفتاب',total:1000,unit:10},
@@ -16,10 +17,11 @@ export function officeAction(state,action,value,core){
  }
  requireOffice(inOffice(state),'دفتر فعال نیست.');
  const o={...state.office,checks:[...state.office.checks],revision:state.office.revision+1};let next={...state,office:o};
+ requireOffice(!o.handoffPending||action==='handoff-finish','تحویل پرونده در حال انجام است.');
  switch(action){
  case 'refer':requireOffice(!o.referral,'نامه قبلاً تحویل شده است.');o.referral=true;break;
  case 'drawer':o.drawer=!o.drawer;break;
- case 'take':requireOffice(o.referral&&o.drawer&&!o.folder&&Object.hasOwn(officeFiles,value),'پوشه قابل برداشت نیست.');o.folder=value;o.onDesk=false;o.open=false;o.issue=null;break;
+ case 'take':requireOffice(o.drawer&&!o.folder&&Object.hasOwn(officeFiles,value),'پوشه قابل برداشت نیست.');o.folder=value;o.onDesk=false;o.open=false;o.issue=null;break;
  case 'return':requireOffice(o.drawer&&o.folder&&!o.onDesk&&!o.attached&&!o.scanning,'پوشه باید در دست باشد.');Object.assign(o,{folder:null,open:false,checks:[],matched:false,sheet:false,scanned:false,issue:null});break;
  case 'place':requireOffice(o.folder&&!o.onDesk,'پوشه در دست نیست.');o.onDesk=true;break;
  case 'lift':requireOffice(o.onDesk&&!o.matched,'بررسی این پوشه در جریان است.');o.onDesk=false;o.open=false;break;
@@ -45,6 +47,9 @@ export function officeAction(state,action,value,core){
  case 'review':
   requireOffice(o.attached&&o.statusRead&&o.calendar&&!o.handed,'بررسی کامل نشده است.');
   if(o.publicRequested){o.issue='premature';break;}if(next.nodeId==='window')next=core.travel(core.interact(next,'evidence'),'route-0');requireOffice(next.completed.includes('window'),'ثبت بازبینی معتبر نیست.');o.reviewed=true;o.issue=null;next.office=o;next.role='manager';break;
+ case 'collect-case':requireOffice(o.reviewed&&!o.handed&&!o.caseCarried,'بسته نتیجه آماده برداشت نیست.');o.caseCarried=true;o.open=false;break;
+ case 'handoff-start':requireOffice(o.caseCarried&&o.reviewed&&!o.publicRequested&&!o.handed&&!o.scanning,'نتیجه برای تحویل آماده نیست.');o.handoffOrigin=exchangeOrigin(value,'office');o.handoffPending=true;break;
+ case 'handoff-finish':requireOffice(o.handoffPending,'تحویل شروع نشده است.');o.handoffPending=false;o.handed=true;o.caseCarried=false;next.role='owner';break;
  case 'handoff':requireOffice(o.reviewed&&!o.publicRequested&&!o.handed,'بررسی کامل نشده است.');o.handed=true;break;
  case 'leave':
   requireOffice(o.handed&&o.reviewed&&!o.publicRequested,'نتیجه هنوز تحویل نشده است.');
@@ -55,7 +60,7 @@ export function officeAction(state,action,value,core){
 }
 export function officeGuidance(state){
  const o=state.office;
- if(!o.referral)return {text:'سلام سارا. پرونده گلخانه آفتاب را برای شروع کار بررسی می‌کنیم. این نامه ارجاع را بگیر؛ شرکت مجری آفتاب است. پوشه‌ها در کشوی بایگانی‌اند. پرونده را روی میز بررسی وسط دفتر باز کن و با سابقه رایانه تطبیق بده.',action:'refer',label:'دریافت نامه ارجاع'};
+ if(!o.referral&&!o.folder)return {text:'سلام سارا. پرونده گلخانه آفتاب را برای شروع کار بررسی می‌کنیم. شرکت مجری آفتاب است؛ اگر راه کار را می‌دانی، مستقیم سراغ کشو و ابزارها برو. پوشه‌ها در کشوی بایگانی‌اند. پرونده را روی میز بررسی وسط دفتر باز کن و با سابقه رایانه تطبیق بده.' };
  if(o.issue==='mismatch'){const f=officeFiles[o.folder];return {text:f?.unit!==10?'در پوشه‌ای که آوردی، قیمت واحد ۵ میلیون است؛ سابقه ثبت‌شده ۱۰ میلیون را نشان می‌دهد. این نسخه مبنای کار نیست. پوشه را از میز بردار، به کشو برگردان و نسخه دیگر آفتاب را بررسی کن.':'این پرونده متعلق به مهتاب است. مبلغ یکسان کافی نیست؛ نام طرح و شرکت مجری باید آفتاب باشند. پوشه را به کشو برگردان و پرونده آفتاب را بیاور.'};}
  if(!o.folder)return {text:'کشوی بایگانی را باز کن و پوشه آفتاب را بیاور. نام طرح و شرکت روی نامه ارجاع است. نسخه‌ها را روی میز بررسی باز کن؛ سابقه معتبر روی رایانه است.'};
  if(!o.onDesk)return {text:'پوشه را روی میز بررسی بگذار. جلدش را باز کن تا اطلاعات برگه دیده شود. بعد پشت رایانه، چهار مشخصه را با سابقه ثبت‌شده مقایسه کن.'};
@@ -64,6 +69,6 @@ export function officeGuidance(state){
  if(!o.attached)return {text:'تصویر آماده است. از رایانه، اسکن را به پرونده کاری پیوست کن. بعد روز امروز را با مهلت روی پرونده مقایسه می‌کنیم.'};
  if(o.issue==='premature')return {text:'امروز داخل مهلت است، اما تعهد شرکت هنوز ثبت و ارسال نشده. خرید عمومی باید بسته بماند. در رایانه دسترسی خرید را خاموش نگه دار و بازبینی را ثبت کن؛ انتشار بعد از تکمیل تعهد انجام می‌شود.'};
  if(!o.reviewed)return {text:'تقویم روی میز کناری را ببین: امروز روز دهم است. مهلت از روز اول تا سی‌ام و وضعیت رسمی شماره ۵، آغاز جمع‌آوری، است. این وضعیت به معنی موفقیت نهایی نیست. چون تعهد مجری هنوز انجام نشده، دسترسی خرید عمومی را بسته نگه دار و بازبینی را در رایانه ثبت کن.'};
- if(!o.handed)return {text:'بررسی کامل است: پرونده آفتاب مبناست، زمان معتبر است و خرید عمومی هنوز بسته می‌ماند. نتیجه را تحویل بده تا با نادر در کارگاه شرکت، تعهد مجری را آماده کنیم.',action:'handoff',label:'تحویل نتیجه بررسی'};
- return {text:'نتیجه ثبت شد. از در خروج کنار میز من به کارگاه شرکت آفتاب برو؛ آنجا در نقش نادر، تعهد مجری را آماده می‌کنی.'};
+ if(!o.handed)return {text:'بررسی کامل است: پرونده آفتاب مبناست، زمان معتبر است و خرید عمومی هنوز بسته می‌ماند. بسته نتیجه را از میز بررسی بردار و به نادر پشت میز تحویل کنار در خروج بده؛ سپس از دید او ادامه می‌دهی.'};
+ return {text:'نتیجه به نادر تحویل شد. از در خروج به پایگاه گلخانه آفتاب برو و در نقش نادر، تعهد مجری را آماده کن.'};
 }
