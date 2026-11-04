@@ -19,7 +19,7 @@ export function buildPaymentScene(root,node,layout,h){
  for(const g of layout.gates){const strip=new T.Group();strip.position.set((g.x-640)*.1,0,(g.y-450)*.1);strip.rotation.y=g.travelYaw;root.add(strip);const t=paymentTools(strip,h,m);t.box('payment-threshold',0,.015,0,8.8,.03,1,m.steel);}
  if(!repair){
   ring('payment-pendant-ring',0,16.2,5,8,.14,m.glow,true);for(const [x,z]of [[-8,5],[8,5],[0,-3],[0,13]])c('payment-pendant-rod',x,17.15,z,.035,1.7,m.steel);
-  const choices=[...layout.gates].sort((a,b)=>a.x-b.x);screen('payment-directory',0,10,-9,17,4.2,['خرید دوم آرمان',...choices.map((g,i)=>['چپ','میانه','راست'][i]+' · '+g.exit.label)]);for(const x of [-6,6])b('payment-directory-hanger',x,15.125,-9,.06,5.75,.06,m.steel);
+  const choices=[...layout.gates].sort((a,b)=>a.x-b.x);screen('payment-directory',0,10,-9,17,4.2,['خرید دوم مانی',...choices.map((g,i)=>['چپ','میانه','راست'][i]+' · '+g.exit.label)]);for(const x of [-6,6])b('payment-directory-hanger',x,15.125,-9,.06,5.75,.06,m.steel);
  }else if(node.scene.paymentVariant===1){for(const x of [-20,-10,0,10,20]){b('payment-capacity-ceiling-blade',x,15.75,8,.15,.5,36,m.metal);b('payment-capacity-ceiling-light',x,15.475,8,.07,.05,32,m.glow);}}
  else{for(let i=0;i<8;i++){const depth=i===7?25:35,z=i===7?9.5:8,panel=b('payment-amount-ceiling-fin',-21+i*6,14.24,z,4.5,.18,depth,m.metal);panel.rotation.z=.08;const light=b('payment-amount-ceiling-light',-21+i*6,14.13,z,3,.04,depth-7,m.glow);light.rotation.z=.08;}}
  for(const f of layout.fixtures){const group=new T.Group();group.name='payment-fixture-'+f.kind;group.position.set(f.x,0,f.z);root.add(group);buildPaymentProp(group,f,h,m);}

@@ -20,7 +20,7 @@ export function buildOfficeEquipment(group,f,t,m,h){
  }else if(f.kind==='condition'){
   b('office-history-base',0,1.25,0,w*.72,2.5,d*.8,m.wood);b('office-history-cap',0,2.6,0,w*.8,.2,d*.85,m.metal);for(const x of [-w*.23,w*.23]){b('office-history-upright',x,4.6,0,.22,4,.22,m.metal);b('office-history-pocket',x,4.9,0,w*.36,3.2,.28,m.cover2);b('office-history-pocket-lip',x,3.5,.22,w*.36,.4,.25,m.metal);for(const side of [-1,1])b('office-history-pocket-side',x+side*w*.18,4.9,.2,.09,3.2,.65,m.metal);}
   // The investor history is an empty physical pocket; the neighbouring pocket contains the purchase conditions.
-  b('office-conditions-sheet',w*.23,4.95,.16,w*.31,2.75,.035,m.paper);for(const [i,s]of ['اولین خرید','حداقل ۵۰'].entries())text(s,w*.23,5.4-i*.65,.184,Math.min(w*.27,3),.4);b('office-empty-pocket-label',-w*.23,3.7,.37,2,.5,.025,m.paper);text('آرمان',-w*.23,3.7,.39,1.7,.3);
+  b('office-conditions-sheet',w*.23,4.95,.16,w*.31,2.75,.035,m.paper);for(const [i,s]of ['اولین خرید','حداقل ۵۰'].entries())text(s,w*.23,5.4-i*.65,.184,Math.min(w*.27,3),.4);b('office-empty-pocket-label',-w*.23,3.7,.37,2,.5,.025,m.paper);text('مانی',-w*.23,3.7,.39,1.7,.3);
  }else return false;
  return true;
 }

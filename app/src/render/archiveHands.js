@@ -38,7 +38,7 @@ export function createArchiveHands(camera,source){
   const arm=mesh(root,sleeveGeo,sleeve,0,0,0),upperArm=mesh(root,sleeveGeo,sleeve,0,0,0),elbowJoint=mesh(root,new T.SphereGeometry(.105,20,16),sleeve,0,0,0);upperArm.visible=elbowJoint.visible=false;const cuff=mesh(root,new T.CylinderGeometry(.071,.072,.045,28),edge,0,0,0);
   const anchor=new T.Group();anchor.name='fitted-'+name.toLowerCase()+'-wrist-anchor';root.add(anchor);const wear=createPlayerWear(anchor,side);cuff.visible=false;
   const wristMaterial=new T.MeshStandardMaterial({color:'#dab18f',roughness:.68});const wristSurface=mesh(anchor,new T.CylinderGeometry(.071,.074,.18,40),wristMaterial,0,0,.07,1,.70,1);wristSurface.rotation.x=Math.PI/2;wristSurface.scale.set(1,1,.70);
-  return {group,body,fingers,side,arm,upperArm,elbowJoint,cuff,wear,anchor,wristMaterial,gripCache:new Map()};
+  return {group,body,fingers,indexTip:bone('Index4')||bone('Index3'),side,arm,upperArm,elbowJoint,cuff,wear,anchor,wristMaterial,gripCache:new Map()};
  }
  const left=hand(-1),right=hand(1),bag=new T.Group();bag.name='archive-open-backpack';root.add(bag);
  // Separate walls leave an actual cavity: the document is occluded by the bag, not hidden early.
@@ -61,9 +61,14 @@ export function createArchiveHands(camera,source){
    const p=pose?(h.side<0?pose.left:pose.right):{position:[h.side*Math.min(.29,.35*aspect),-.67+lean,-.66],rotation:[.15,h.side*.12,h.side*.17],grip:.22};
    const shown=p.visible!==false;h.group.visible=h.arm.visible=h.anchor.visible=shown;h.upperArm.visible=h.elbowJoint.visible=shown&&Boolean(p.articulated);if(!shown)continue;
    h.group.position.fromArray(p.position);h.group.rotation.set(...p.rotation,'YXZ');
-   for(const f of h.fingers){const curl=p.grasp==='reference-paper'?.03:p.grasp==='paper'&&!['Thumb','Index'].includes(f.digit)?(p.relaxedCurl||.85)*Math.min(1,(p.grip||0)/.68):(p.grip||0),amount=(f.digit==='Thumb'?.38:.85)*curl*(f.segment===1?.65:1);f.joint.quaternion.copy(f.rest).premultiply(new T.Quaternion().setFromAxisAngle(f.axis,-amount));}
+   for(const f of h.fingers){const curl=p.grasp==='fingerprint'&&f.digit==='Index'?0:p.grasp==='reference-paper'?.03:p.grasp==='paper'&&!['Thumb','Index'].includes(f.digit)?(p.relaxedCurl||.85)*Math.min(1,(p.grip||0)/.68):(p.grip||0),amount=(f.digit==='Thumb'?.38:.85)*curl*(f.segment===1?.65:1);f.joint.quaternion.copy(f.rest).premultiply(new T.Quaternion().setFromAxisAngle(f.axis,-amount));}
    if(p.grasp==='reference-paper'){const grasp=referencePaperGrip(h);for(const {joint,rotation}of grasp.joints)joint.quaternion.copy(rotation);h.group.position.sub(grasp.anchor.clone().multiplyScalar(appearance.handScale).applyQuaternion(h.group.quaternion));}
    if(p.grasp==='paper'){const weight=T.MathUtils.clamp((p.grip||0)/.68,0,1),grasp=paperGrip(h,p.thickness||.02,appearance.handScale);for(const {joint,rotation}of grasp.joints)joint.quaternion.slerp(rotation,weight);const offset=grasp.anchor.clone().multiplyScalar(appearance.handScale*weight).applyQuaternion(h.group.quaternion);h.group.position.sub(offset);}
+   if(p.alignTip&&h.indexTip){
+    const tip=root.worldToLocal(h.indexTip.getWorldPosition(new T.Vector3()));
+    const offset=tip.sub(h.group.position);
+    h.group.position.addScaledVector(offset,-p.alignTip);
+   }
    if(p.shoulder)shoulder.fromArray(p.shoulder);else shoulder.set(h.side*Math.min(.52,.55*aspect),-1.02,.14);wristPoint.copy(h.group.position);if(p.articulated){const pose=bentArm(shoulder,wristPoint,.58,.55,h.side);h.group.position.copy(pose.wrist);wristPoint.copy(pose.wrist);const segment=(mesh,a,b)=>{const axis=b.clone().sub(a);mesh.position.copy(a).lerp(b,.5);mesh.quaternion.setFromUnitVectors(up,axis.clone().normalize());mesh.scale.set(appearance.armWidth,axis.length(),appearance.armWidth);};segment(h.upperArm,pose.shoulder,pose.elbow);h.elbowJoint.position.copy(pose.elbow);h.elbowJoint.scale.setScalar(appearance.armWidth);shoulder.copy(pose.elbow);h.group.userData.armPose=pose;}direction.copy(wristPoint).sub(shoulder);
    const axis=direction.clone().normalize(),armEnd=wristPoint.clone().addScaledVector(axis,-.15);
    h.arm.position.copy(shoulder).lerp(armEnd,.5);h.arm.quaternion.setFromUnitVectors(up,axis);h.arm.scale.set(appearance.armWidth,shoulder.distanceTo(armEnd),appearance.armWidth);
@@ -71,7 +76,7 @@ export function createArchiveHands(camera,source){
    h.anchor.position.copy(wristPoint);h.anchor.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(x,y,z));h.anchor.scale.setScalar(appearance.handScale);h.wristMaterial.color.set(skin).multiplyScalar(.88);
    h.cuff.position.copy(wristPoint).lerp(shoulder,.025);h.cuff.quaternion.copy(h.arm.quaternion);
   }
-  const appearance=left.wear.update(role);bag.scale.fromArray(appearance.bagScale);bag.visible=Boolean(pose?.bag.visible);if(pose){bag.position.fromArray(pose.bag.position);lid.rotation.x=-pose.bag.open*1.85;slider.position.x=.52-pose.bag.zip*1.04;}
+  const appearance=left.wear.update(role);bag.scale.fromArray(appearance.bagScale);bag.visible=Boolean(pose?.bag.visible);if(bag.visible){bag.position.fromArray(pose.bag.position);lid.rotation.x=-pose.bag.open*1.85;slider.position.x=.52-pose.bag.zip*1.04;}
  }
  return {root,update};
 }

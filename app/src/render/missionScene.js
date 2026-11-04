@@ -1,3 +1,4 @@
+import {buildObligationsScene} from './obligationsScene.js';
 import {buildCompletionScene} from './completionScene.js';
 import {buildOperationsScene} from './operationsScene.js';
 import {buildParticipationScene} from './participationScene.js';
@@ -19,6 +20,7 @@ import * as T from '../../vendor/three.module.js';
 
 /* Scene architecture uses shared geometry/material caches; only the active location is built. */
 export function buildMissionScene(parent,node,layout,h){
+ if(node.scene.obligationsRoom)return buildObligationsScene(parent,node,layout,h);
  if(node.scene.completionRoom)return buildCompletionScene(parent,node,layout,h);
  if(node.scene.operationsRoom)return buildOperationsScene(parent,node,layout,h);
  if(node.scene.participationRoom)return buildParticipationScene(parent,node,layout,h);

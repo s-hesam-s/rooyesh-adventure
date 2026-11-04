@@ -11,7 +11,48 @@ dialog.office-device[data-office-station="scanner"]{width:min(350px,90vw)}
 
 .issuer-calculator-display{display:block;background:#c7d1b1;color:#243d30;border:7px solid #33483c;padding:14px;font:22px monospace;min-height:70px;direction:ltr;text-align:right;overflow-wrap:anywhere}.issuer-keypad{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:12px;direction:ltr}.issuer-keypad button{padding:10px;border:1px solid #7c968b;border-radius:5px;background:#e0e5da;font-size:18px}.issuer-slip{border-bottom:1px solid #b4c3b4;padding-bottom:15px;margin-bottom:12px}.issuer-slip input{width:20px;height:20px;vertical-align:middle;accent-color:#39664c}.issuer-progress{width:100%;height:10px;accent-color:#39775e}dialog[data-environment="issuer"].office-device{width:min(420px,90vw)}dialog[data-environment="issuer"][data-office-station="scanner"],dialog[data-environment="issuer"][data-office-station="printer"]{width:min(330px,90vw)}
 .office-mode .role-card{left:18px;top:auto;bottom:88px;transform:none;max-width:310px;width:calc(100% - 36px);padding:12px 16px;gap:12px}.office-mode .role-card img{width:48px;height:60px}.office-mode .role-card strong{font-size:17px}
-.participation-field{display:grid;grid-template-columns:minmax(10rem,1fr) minmax(8rem,1fr);gap:.8rem;align-items:center;margin:.7rem 0;color:#29483f}.participation-field input{width:100%;min-width:0;box-sizing:border-box;border:1px solid #94a998;border-radius:.5rem;background:#fffdf2;color:#163d35;font:600 1.05rem Vazirmatn, sans-serif;padding:.7rem;direction:ltr;text-align:left}.participation-field input:focus-visible{outline:3px solid #bd9752;outline-offset:2px}.participation-field input:disabled{opacity:.55}.participation-preview{display:block;margin:.7rem 0;font-weight:650;color:#234c40}.participation-progress{width:100%;accent-color:#4c8067;margin:1rem 0}@media(max-width:600px){.participation-field{grid-template-columns:1fr;gap:.3rem}}
+.participation-field{display:grid;grid-template-columns:minmax(10rem,1fr) minmax(8rem,1fr);gap:.8rem;align-items:center;margin:.7rem 0;color:#29483f}.participation-field input{width:100%;min-width:0;box-sizing:border-box;border:1px solid #94a998;border-radius:.5rem;background:#fffdf2;color:#163d35;font:600 1.05rem Vazirmatn, sans-serif;padding:.7rem;direction:ltr;text-align:left}.participation-field input:disabled{opacity:.55}.participation-preview{display:block;margin:.7rem 0;font-weight:650;color:#234c40}.participation-progress{width:100%;accent-color:#4c8067;margin:1rem 0}@media(max-width:600px){.participation-field{grid-template-columns:1fr;gap:.3rem}}
 #game.carrying #controls{left:14px;right:auto;transform:none;max-width:42vw;flex-wrap:wrap;justify-content:center;gap:8px;padding:9px 12px}#game.carrying #controls>span,#game.carrying #controls>i{display:none}#held-read{white-space:nowrap}#held-read[aria-pressed="true"]{background:#d8e5cd;border-radius:5px}
 
 .operations-progress{display:block;width:100%;height:7px;accent-color:#526f89}
+
+/* Match the bank result selector to the numeric fields in the same form. */
+[data-environment="obligations"] .participation-field select {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid #94a998;
+  border-radius: .5rem;
+  background: #fffdf2;
+  color: #163d35;
+  font: inherit;
+  padding: .7rem;
+}
+dialog .participation-field :is(input, select):focus {
+  outline: 2px solid #287889;
+  outline-offset: -3px;
+  box-shadow: none;
+}
+
+.obligations-progress { width: 100%; accent-color: #315c61; }
+
+.obligations-ending { animation: obligations-recap-in 900ms ease-out both; }
+.obligations-recap { text-align: start; margin-block: 1rem; line-height: 1.8; }
+.obligations-recap li { animation: obligations-recap-in 360ms ease-out both; }
+.obligations-recap li:nth-child(1) { animation-delay: 220ms; }
+.obligations-recap li:nth-child(2) { animation-delay: 370ms; }
+.obligations-recap li:nth-child(3) { animation-delay: 520ms; }
+.obligations-recap li:nth-child(4) { animation-delay: 670ms; }
+@keyframes obligations-recap-in {
+ from { opacity: 0; transform: translateY(12px); }
+ to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+ .obligations-ending, .obligations-recap li { animation: none; }
+}
+
+
+#ending-screen.courtyard-thanks { background: transparent; backdrop-filter: none; pointer-events: none; }
+#ending-screen.courtyard-thanks .ending-panel { display: none; }
+#game-thanks { position: fixed; inset: 0; pointer-events: none; }
+#game-thanks .thanks-back { position: absolute; bottom: 2rem; inset-inline-start: 50%; translate: 50% 0; pointer-events: auto; }

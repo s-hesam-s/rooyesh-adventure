@@ -17,7 +17,7 @@ import {buildCompletionScene} from '../app/src/render/completionScene.js';
 import {walkable,findPath} from '../app/src/game/world.js';
 import {canInspectFrom} from '../app/src/game/firstPerson.js';
 import {readSave,writeSave,KEY} from '../app/src/game/campaignStorage.js';
-const act=completionAct,begin=()=>act(createEnvironmentTestJourney('legalIdentity','completion-test'),'begin');
+const act=completionAct,begin=()=>act(createEnvironmentTestJourney('legalIdentity','completion-test'),'begin',1);
 function exchange(s,recipient){const role=({leila:'legal',sara:'manager',arman:'client',ack:'manager'})[recipient],p=s.completion.people[role],origin=Array.from({length:16},(_,i)=>({x:p.x+Math.cos(i*Math.PI/8)*3,z:p.z+Math.sin(i*Math.PI/8)*3,yaw:.5})).find(v=>walkable({x:640+v.x*10,y:450+v.z*10},completionLayout(s.completion),12));return act(act(s,'handoff',{recipient,origin}),'handoff-finish');}
 function legal(){let s=exchange(begin(),'leila');for(const a of ['place-plan','briefcase','take-company','load','scan','scan-finish','unload','store-company'])s=act(s,a);s=act(s,'company-record','bahar');for(const c of companyChecks)s=act(s,'company-check',c);return act(s,'identity');}
 function paid(){let s=legal();s=act(s,'field',{name:'expression',value:'1000-120-200-80'});s=act(s,'calculate');assert.equal(s.completion.result,600);s=act(s,'field',{name:'units',value:'۶۰'});return act(act(s,'treasury'),'treasury-finish');}
@@ -53,3 +53,43 @@ test('recipient keeps arms raised until hidden and the document stays in front o
 test('real signing hand and elbow keep fixed anatomy and pinch the pen from every side of the desk',()=>{const root=built(),camera=new T.PerspectiveCamera(72,16/9,.08,650),rig=createArchiveHands(camera,sourceRig());let s=paid();for(const a of ['take-receipt','load','scan','scan-finish','unload','sign'])s=act(s,a);for(const role of ['legal','client'])for(const base of [{x:1,y:4.8,z:25,yaw:0,pitch:-.15},{x:-3,y:4.8,z:22,yaw:-Math.PI/2,pitch:-.1},{x:4,y:4.8,z:22,yaw:Math.PI/2,pitch:-.2}])for(const elapsed of [0,.18,.4,.8,1.2,1.65,1.8]){const view=signingCamera(base,elapsed);camera.position.set(view.x,view.y,view.z);camera.rotation.set(view.pitch,view.yaw,0,'YXZ');camera.updateMatrixWorld(true);const pose=root.userData.completionUpdate(s,1/60,camera,false,{jobElapsed:elapsed});rig.update({role,pose:pose.hands});camera.updateMatrixWorld(true);const hand=rig.root.getObjectByName('archive-right-hand'),arm=hand.userData.armPose;assert.ok(Math.abs(arm.shoulder.distanceTo(arm.elbow)-.58)<1e-6);assert.ok(Math.abs(arm.elbow.distanceTo(arm.wrist)-.55)<1e-6);assert.ok(arm.shoulder.distanceTo(arm.wrist)<1.131);const thumb=hand.getObjectByName('mixamorigRightHandThumb4').getWorldPosition(new T.Vector3()),index=hand.getObjectByName('mixamorigRightHandIndex4').getWorldPosition(new T.Vector3()),pinch=thumb.lerp(index,.5),pen=root.getObjectByName('completion-signing-pen').localToWorld(new T.Vector3(0,.43,0));assert.ok(pinch.distanceTo(pen)<.001,'hand detaches from pen '+role+' '+elapsed+' '+pinch.distanceTo(pen));}});
 
 test('all receiving avatars support the document above actual hand geometry without hand or torso penetration',()=>{const world=new T.Group(),architecture=new T.Group();world.add(architecture);const cache=new Map(),material=new T.MeshStandardMaterial(),helpers={mat:()=>material,geo:(key,build)=>{if(!cache.has(key))cache.set(key,build());return cache.get(key);}},actors={guide(parent,x,z,profile,h){const root=new T.Group();parent.add(root);return buildDistinctGuide(root,profile.identity,h);}};buildCompletionScene(architecture,completionNode,completionLayout(),helpers);const people=buildCompletionParticipants(world,actors,helpers),camera=new T.PerspectiveCamera();for(const [state,recipient,role]of [[begin(),'leila','legal'],[packaged(),'sara','manager'],[issued(),'arman','client'],[act(act(act(accepted(),'store-certificate'),'sign'),'sign-finish'),'ack','manager']]){const target=state.completion.people[role],s=act(state,'handoff',{recipient,origin:{x:target.x,z:target.z-5,yaw:Math.PI}});for(const elapsed of [2,2.45,3,3.6,4.2]){people.update(s,elapsed,camera,false);architecture.userData.completionUpdate(s,1/60,camera,false,{jobElapsed:elapsed});world.updateMatrixWorld(true);const doc=new T.Box3().setFromObject(world.getObjectByName('completion-held-'+s.completion.held));for(const side of [-1,1]){const hand=new T.Box3().setFromObject(people.people[role].root.getObjectByName('hand-'+side));assert.ok(doc.min.y>=hand.max.y+.009,'paper intersects receiving hand '+recipient+' '+elapsed+' '+doc.min.y+' '+hand.max.y);assert.ok(doc.min.y-hand.max.y<.09,'paper floats above receiving hand '+recipient);const paper=world.getObjectByName('completion-held-'+s.completion.held),palm=people.people[role].root.getObjectByName('hand-'+side).getObjectByName('palm'),contact=paper.worldToLocal(palm.getWorldPosition(new T.Vector3())),folder=['plan','legal-package'].includes(s.completion.held);if(completionExchangePose(s,elapsed).transfer===1){assert.ok(Math.abs(contact.x)<(folder?1.25:1.1),'palm must support the fully delivered paper from below '+recipient);assert.ok(Math.abs(contact.z)<(folder?1.6:1.4),'palm lies under the fully delivered paper depth '+recipient);}}}}});
+
+test('meeting aisle stays open and rendered furniture matches collision footprints',()=>{
+ const s=act(createEnvironmentTestJourney('legalIdentity','completion-aisle'),'begin'),layout=completionLayout(s.completion),root=built();
+ for(const [kind,name] of [['meeting','completion-oval-meeting-table'],['briefcase','completion-briefcase-cabinet']]){
+  const f=layout.fixtures.find(f=>f.kind===kind),mesh=root.getObjectByName(name);
+  assert.deepEqual([mesh.position.x,mesh.position.z],[f.x,f.z]);
+ }
+ for(let z=5;z<=17;z+=.5)assert.ok(walkable({x:470,y:450+z*10},layout,18),'aisle at '+z);
+});
+test('updated pavilion requires a physical transfer from the printer to the embossing die and replays it',()=>{
+ let s=act(createEnvironmentTestJourney('legalIdentity','completion-modern'),'begin');
+ const run=(action,value)=>{s=act(s,action,value);assert.deepEqual(restoreJourney(s),s,action);};
+ s=exchange(s,'leila');
+ run('place-plan');run('briefcase');
+ assert.throws(()=>act(s,'take-company'));
+ for(const a of ['open-plan','take-company','load'])run(a);
+ assert.throws(()=>act(s,'unload'));
+ for(const a of ['scan','scan-finish','unload','store-company'])run(a);
+ run('company-record','bahar');
+ for(const key of companyChecks)run('company-check',key);
+ run('identity');run('field',{name:'units',value:'60'});
+ for(const a of ['treasury','treasury-finish','take-receipt','load','scan','scan-finish'])run(a);
+ assert.throws(()=>act(s,'sign'));
+ for(const a of ['unload','sign','sign-finish','assemble','collect-package'])run(a);
+ s=exchange(s,'sara');
+ run('send','L-600');
+ for(const a of ['send-finish','close','responses','responses-finish'])run(a);
+ for(const key of ['agent','institution'])run('approval-check',key);
+ run('field',{name:'finalStatus',value:'15'});
+ for(const a of ['final','print','print-finish'])run(a);
+ assert.throws(()=>act(s,'emboss'));
+ run('collect-certificate');assert.throws(()=>exchange(s,'arman'));
+ run('place-certificate');assert.throws(()=>act(s,'collect-certificate'));
+ for(const a of ['emboss','emboss-finish','collect-certificate'])run(a);
+ s=exchange(s,'arman');
+ run('certificate-owner','arman');run('field',{name:'certificateAmount',value:'280'});
+ for(const a of ['accept-certificate','store-certificate','sign','sign-finish'])run(a);
+ s=exchange(s,'ack');run('leave');
+ assert.equal(s.completion.done,true);
+});

@@ -7,7 +7,7 @@ export function buildDistinctGuide(root,identity,h){
  const body=new T.Group();body.name='guide-body-'+c.id;root.add(body);root.scale.setScalar(c.height/5.6);
  const skin=new T.MeshStandardMaterial({color:c.skin,roughness:.64}),hair=new T.MeshStandardMaterial({color:c.hair,roughness:.88}),eyeWhite=new T.MeshStandardMaterial({color:'#eee7dd',roughness:.33}),iris=new T.MeshStandardMaterial({color:c.eyes,roughness:.37}),lip=new T.MeshStandardMaterial({color:c.gender==='man'?'#754b3e':'#a66b62',roughness:.72});
  for(const material of [skin,hair,eyeWhite,iris,lip])material.userData.transient=true;
- const cloth=workwearMaterial(c.jacket,{repeat:5}),shirt=h.mat(c.shirt),trousers=h.mat(c.trousers),shoe=h.mat('#292b2c'),metal=h.mat(c.id==='nika'?'#b49b63':'#68797d');
+ const cloth=workwearMaterial(c.jacket,{repeat:5}),shirt=h.mat(c.shirt),trousers=h.mat(c.trousers),shoe=h.mat(c.hairStyle==='bald'&&c.id==='playerArman'?'#111114':'#292b2c'),metal=h.mat(c.id==='nika'?'#b49b63':'#68797d');
  cloth.userData.transient=true;cloth.userData.ownedMaps=['map','normalMap','roughnessMap'];
  const sleeve=c.shirtSleeves?shirt:cloth;
  const sphere=h.geo('identity-sphere',()=>new T.SphereGeometry(1,36,28)),unit=h.geo('identity-box',()=>new T.BoxGeometry(1,1,1));
@@ -78,7 +78,7 @@ export function buildDistinctGuide(root,identity,h){
   ellipsoid(head,'short-beard-chin',hair,0,.23,.19,c.headWidth*.74,.15,c.headDepth*.51);
   for(const side of [-1,1])curve(head,'short-beard-jaw-'+side,[[side*c.headWidth*.91,.56,.08],[side*c.headWidth*.83,.37,.23],[side*c.headWidth*.45,.23,.35]],.04,hair);
  }
- const cap=h.geo(c.id+'-hair-cap',()=>new T.SphereGeometry(1,48,24,0,Math.PI*2,0,Math.PI*.37));mesh(head,'hair-cap',cap,hair,0,.62,-.02,c.headWidth*1.06,c.headHeight*1.08,c.headDepth*1.07);
+ if(c.hairStyle!=='bald'){const cap=h.geo(c.id+'-hair-cap',()=>new T.SphereGeometry(1,48,24,0,Math.PI*2,0,Math.PI*.37));mesh(head,'hair-cap',cap,hair,0,.62,-.02,c.headWidth*1.06,c.headHeight*1.08,c.headDepth*1.07);}
  if(c.hairStyle==='shoulder')for(const side of [-1,1]){
   ellipsoid(head,'side-hair-'+side,hair,side*c.headWidth*.98,.32,-.07,.13,.49,.23);
   for(let j=0;j<4;j++)curve(head,'hair-strand-'+side+'-'+j,[[side*(c.headWidth+.02),.8,-.02+j*.06],[side*(c.headWidth+.055),.3,-.03+j*.055],[side*(c.headWidth-.015),-.1,.01+j*.04]],.012,h.mat('#4c3830'));

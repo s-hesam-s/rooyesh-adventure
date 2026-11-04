@@ -1,3 +1,4 @@
+import {obligationsLayout} from './obligationsRoom.js';
 import {completionLayout} from './completionRoom.js';
 import {operationsLayout} from './operationsRoom.js';
 import {participationLayout} from './participationRoom.js';
@@ -15,6 +16,7 @@ export function segmentDistance(p,a,b){
 const point=(x,y)=>({x,y});
 import {officeLayout} from './officeRoom.js';
 export function layoutFor(node){
+ if(node.scene?.obligationsRoom)return obligationsLayout();
  if(node.scene?.completionRoom)return completionLayout();if(node.scene?.operationsRoom)return operationsLayout();
  if(node.scene?.participationRoom)return participationLayout();
  if(node.scene?.issuerRoom)return issuerLayout();
