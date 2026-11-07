@@ -123,7 +123,7 @@ export function obligationsAction(state,action,value,core){
   requireStep(node==='payment'&&o.scanned&&!o.wrapUp&&(o.version!==2||o.held==='bank'),'تصویر سند بانکی لازم است.');
   requireStep(number(value?.installment)===1&&number(value?.amount)===state.ledger.schedule[0]?.amount&&value?.success==='yes','شماره نوبت، مبلغ و نتیجه را با سند بانکی تطبیق بده.');
   commit();
-  if(!core.replay||value.review===true){value={...value,review:true};o.wrapUp={nodeId:next.nodeId,ending:next.ending,role:next.role};next={...next,nodeId:node,ending:null,role:state.role};}
+  if(!core.replay||value.review===true){value={...value,review:true};o.bankFiled=true;o.held=null;o.wrapUp={nodeId:next.nodeId,ending:next.ending,role:next.role};next={...next,nodeId:node,ending:null,role:state.role};}
   break;
  default: throw new Error('عملیات تعهدات نامعتبر است.');
  }

@@ -1,3 +1,7 @@
+import * as T from '../app/vendor/three.module.js';
+import {buildObligationsScene} from '../app/src/render/obligationsScene.js';
+import {batchArchitecture} from '../app/src/render/missionBatches.js';
+import {obligationsNode} from '../app/src/game/obligationsRoom.js';
 import {canInspectFrom} from '../app/src/game/firstPerson.js';
 import test from 'node:test';
 import {obligationsDates} from '../app/src/game/obligationsCalendar.js';
@@ -78,4 +82,47 @@ test('the calendar adds three Persian months and clamps a missing destination da
  assert.equal(shortMonth.start,Date.UTC(2024,8,22));
  const monthEnd=obligationsDates('2024-09-21T10:00:00Z');
  assert.equal(monthEnd.end,Date.UTC(2024,11,20));
+});
+
+
+test('batching the obligations office preserves animated controls and avoids rebuilding idle ribbon geometry',t=>{
+ const previousDocument=globalThis.document;
+ const context=new Proxy({}, {get:()=>()=>{}});
+ globalThis.document={createElement:()=>({getContext:()=>context})};
+ try{
+  const materials=new Map(),geometries=new Map(),boxes=[];
+  const mat=color=>{if(!materials.has(color))materials.set(color,new T.MeshStandardMaterial({color}));return materials.get(color);};
+  const box=(parent,x,y,z,w,height,depth,color)=>{
+   const key=[w,height,depth].join(',');
+   if(!geometries.has(key))geometries.set(key,new T.BoxGeometry(w,height,depth));
+   const mesh=new T.Mesh(geometries.get(key),mat(color));mesh.position.set(x,y,z);parent.add(mesh);boxes.push(mesh);return mesh;
+  };
+  const beam=(parent,a,b,width,color)=>{
+   const start=new T.Vector3(...a),end=new T.Vector3(...b),mesh=box(parent,0,0,0,width,start.distanceTo(end),width,color);
+   mesh.position.copy(start).lerp(end,.5);mesh.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),end.sub(start).normalize());return mesh;
+  };
+  const root=new T.Group();buildObligationsScene(root,obligationsNode,obligationsLayout(),{box,beam,mat,tree(){}});
+  const drawer=boxes.find(mesh=>mesh.position.x===0&&mesh.position.y===0&&mesh.geometry.parameters.height===1.03).parent;
+  const scan=boxes.find(mesh=>mesh.geometry.parameters.width===2.48&&mesh.geometry.parameters.height===.018);
+  const lamp=boxes.find(mesh=>mesh.geometry.parameters.width===.24&&mesh.geometry.parameters.height===.1);
+  const ribbon=[];root.traverse(mesh=>{if(mesh.geometry?.parameters.widthSegments===24)ribbon.push(mesh.geometry);});
+  let before=0;root.traverse(mesh=>{if(mesh.isMesh)before++;});
+  const result=batchArchitecture(root);assert.ok(result.removed>100,JSON.stringify(result));
+  let after=0;root.traverse(mesh=>{if(mesh.isMesh)after++;});
+  t.diagnostic('Office render meshes '+before+' -> '+after+'; batches '+result.batches);
+  for(const mesh of [scan,lamp]){assert.ok(mesh.parent);assert.equal(mesh.userData.dynamic,true);}
+  const camera=new T.PerspectiveCamera();camera.position.set(-19,4.8,5);
+  const state={startedAt:'2026-11-07T08:00:00Z',ledger:{schedule:[]},obligations:{cabinetOpen:true,job:null,held:null}};
+  const update=()=>root.userData.obligationsUpdate(state,camera,false,{jobElapsed:1,dt:1/60,reduced:true,carry:{}});
+  update();assert.ok(drawer.position.z<7);
+  const versions=ribbon.map(geometry=>geometry.attributes.position.version);
+  update();assert.deepEqual(ribbon.map(geometry=>geometry.attributes.position.version),versions);
+  state.obligations.job='scan';update();assert.equal(scan.visible,true);
+  state.obligations.job='print';update();assert.equal(lamp.visible,true);
+  state.obligations.job=null;state.obligations.held='contract';
+  assert.ok(update().hands.left.visible);
+  root.updateMatrixWorld(true);root.traverse(mesh=>assert.ok(mesh.matrixWorld.elements.every(Number.isFinite)));
+  assert.equal(root.getObjectByName('courtyard-disco-ball'),undefined);
+  assert.equal(root.getObjectByName('courtyard-thanks-sign'),undefined);
+ }finally{globalThis.document=previousDocument;}
 });

@@ -2,7 +2,7 @@
 
 A Persian first-person 3D learning game about crowdfunding operations. Players explore workplaces, handle documents and equipment, and practice the responsibilities of a financial manager, an issuer representative, an individual investor, and a corporate investor.
 
-**Status:** playable prototype under active development. The business-rule campaign contains ten chapters and twenty decisions. Its physical experience is being consolidated into six distinct environments. The redesigned office, issuer greenhouse, participation branch, financial operations centre and contract pavilion are playable; the final obligations environment still uses its legacy implementation. The six-environment redesign is not complete.
+**Status:** playable prototype under active development. All six redesigned environments are playable locally. The campaign contains ten business chapters and twenty validated decisions, carried out through workplace equipment, physical documents and role handoffs. Further visual polish and usability review are ongoing.
 
 ![Redesigned first office](docs/office-current.png)
 
@@ -12,7 +12,7 @@ A Persian first-person 3D learning game about crowdfunding operations. Players e
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="docs/screenshots/portfolio-poster.png" /><source type="image/webp" srcset="docs/screenshots/portfolio.webp" /><img src="docs/screenshots/portfolio.gif" width="100%" alt="Rooyesh · Path of the Sun — actual captured UI states" /></picture>
 
-Actual first-office environment-test capture: entering the room, walking, turning and opening the journal. Playable prototype under active development; the six-environment redesign remains incomplete.
+Earlier first-office environment-test capture showing entry, movement and the journal. The current game includes all six redesigned environments. This recording shows an earlier build.
 
 [Reproduce this capture and view the static image](docs/PORTFOLIO-PREVIEW.md)
 
@@ -30,7 +30,7 @@ Requires Node.js 22+ and a modern desktop browser with WebGL support. Runtime de
 
 Open http://127.0.0.1:4318 . On Windows, Start.cmd starts the same local server and opens the browser; Stop.cmd stops the process started by that launcher. The launcher uses runtime/node.exe when locally available, otherwise Node.js from PATH. The executable itself is excluded from source control.
 
-On the start screen choose the first office under direct environment testing to explore it without changing the main saved journey. The issuer greenhouse, participation branch, operations centre and contract pavilion also support direct testing; the final redesign destination is visible but disabled. The legacy environment atlas remains a preview of the earlier version.
+The start screen offers a normal saved journey and independent test entry points for all six environments. A seventh test option starts outside the final office, with the courtyard door open, for testing the ribbon-cutting conclusion. Environment tests keep the main saved journey separate.
 
 ## Controls
 
@@ -40,7 +40,20 @@ On the start screen choose the first office under direct environment testing to 
 - Inside a panel: Tab / Shift+Tab or arrows to navigate; E / Enter / Space to activate or toggle; Escape to close.
 - M: journal; Escape: pause; H: hide the HUD.
 
-The redesigned office and issuer environment support keyboard operation, contextual guide dialogue, camera-relative document carrying, multi-side desk/guide access, directional device access, animated drawers/folders, scanner movement and light, and computer feedback. The issuer environment adds a working calculator, separate receipt scans with paper feed, carried dossier handoff and role transfer, sending/response, animated printing and receipt pickup, and publication in one location. The participation branch combines identity verification, a scanned existing 200-million receipt, a separate 80-million simulated gateway request, local training-card/OTP interaction, receipt printing, and a physical dossier handoff to the financial manager. The following operations centre separates bank confirmation, paper-receipt validation, existing online registration lookup, and paper-only submission, followed by report printing and dossier completion. The contract pavilion combines corporate identity and authorization checks, remaining-capacity calculation, a simulated treasury receipt, document scanning and signature, physical handoffs among Leila, Sara and Arman, paper-only submission, fundraising closure, separate final approvals, certificate printing and embossing. Arman retains his original 280-million certificate and returns only a signed receipt acknowledgement to Sara. Across all five redesigned locations, carried objects leave the forward view clear; R or the reading button brings the same object closer for inspection, and walking lowers it again. Additional animation and character polish remain planned.
+Players can complete the interactions with a keyboard, use optional contextual guides, inspect carried documents with R, and approach desks and people from multiple directions. Directional equipment requires working from its front. Documents move between printers, scanners, filing locations and the hands of the appropriate character. Physical handoffs turn the receiving character toward the player and transfer the point of view.
+
+## Six connected environments
+
+| Environment | Business workflow and interactions |
+| --- | --- |
+| Project review and archive | Identify the correct project dossier, compare its terms, print a reconciliation sheet, scan and attach it, review the permitted dates and hand the reviewed file to the issuer representative. |
+| Issuer greenhouse and financial office | Verify the issuer, calculate its 120-million-toman commitment, register either one 120-million receipt or two receipts of 100 and 20 million, scan and file the originals, hand the dossier to the manager, submit it and publish the project after the required response. |
+| Individual participation branch | Verify identity with a fingerprint reader, register a 200-million-toman receipt purchase, create a separate 80-million gateway request with a local randomized OTP displayed on a modeled phone, print and assemble the documents, and hand them to the manager. |
+| Financial operations centre | Reconcile the bank response, examine and scan the original receipt, query the online purchase's existing registration, submit only the paper receipt, print the results and complete the project dossier. |
+| Contracts and certificate pavilion | Verify the corporate investor and its representative, calculate the remaining 600-million capacity, register 60 units, scan the treasury receipt, sign and exchange documents, close fundraising, reconcile final approvals, print and emboss the individual investor's 280-million certificate and archive the signed acknowledgement. |
+| Obligations and settlement office | Read the contract, register four quarterly payments of 60 million at a 24% annual rate over 12 months, automatically print the schedule, advance the physical calendar device by three Persian months, receive and scan the bank document and reconcile only the first payment. Three obligations remain open. A courtyard ribbon-cutting sequence leads to the final ledger summary. |
+
+Players take the roles of Shabnam, financial manager; Nader, issuer representative; Mani, individual investor; and Ghazaleh, corporate-investor representative. Guide conversations are optional and business prerequisites are enforced by the domain state machine.
 
 ## Implementation
 
@@ -66,7 +79,11 @@ For a fresh checkout, use the declared Node.js prerequisite, run `npm test`, the
 
     npm test
 
-The latest recorded local suite contains **432 passing tests**. It covers domain progression, invalid/duplicate actions, receipt and payment rules, replay/storage, movement/collision, assets, and scene/interaction regressions. Local browser checks also cover the office workflow and the participation workflow, keyboard editing, printing, role handoff and onward travel. Participation workstation navigation in the complete browser scenario uses temporary test positioning; normal movement and all workstation routes are checked separately. The operations and contract-pavilion workflows were also exercised in separate browser review entry points with temporary station positioning; movement routes and collision are tested independently. Other devices, complete redesign coverage, and measured educational outcomes are not implied.
+The latest local verification on 2026-11-07 passed **444 Node.js tests** and **40 Python maintenance tests**. Coverage includes valid and invalid progression, duplicate-action prevention, capacity and payment rules, interrupted-operation replay, local saves, device access, movement and collision, resource integrity, and scene-animation regressions. The two GitHub Actions jobs run the game suite on Node.js 22 and 24.
+
+Browser review covered entry into all six environments, the final office drawer, the courtyard sequence and the resulting financial summary, without recorded JavaScript errors. A complete manual playthrough of every mission has not yet been performed. Automated checks do not establish visual correctness on every device or measured learning effectiveness.
+
+Static geometry is instanced while animated equipment remains independent. In the obligations-scene regression fixture, batching reduced render meshes from 468 to 241; this is a scene-structure measurement rather than a device frame-rate benchmark.
 
 Start with [the six-environment plan](docs/SIX-ENVIRONMENT-REALISTIC-WORKFLOW.md), [interaction standards](docs/INTERACTION-STANDARD.md), [the office review](docs/OFFICE-ENVIRONMENT-REVIEW.md), and [the issuer greenhouse review](docs/ISSUER-ENVIRONMENT-REVIEW.md), and [the participation branch review](docs/PARTICIPATION-ENVIRONMENT-REVIEW.md). Detailed project memory is maintained separately in Obsidian. Older environment reports describe earlier iterations, including a retired wrong-door mechanic; they do not override the six-environment plan.
 
@@ -76,7 +93,7 @@ Public availability does not grant a project-wide open-source license. Third-par
 
 ---
 
-بازی آموزشی مستقل برای تجربه عملی فرایند تأمین مالی جمعی است. نسخه فعلی قابل اجراست، اما بازطراحی شش محیط هنوز کامل نشده است. برنامه و وضعیت محیط‌ها در docs/SIX-ENVIRONMENT-REALISTIC-WORKFLOW.md و حافظه تفصیلی توسعه بیرون از مخزن در Obsidian نگهداری می‌شوند. تمام عملیات مالی ساختگی و محلی‌اند.
+بازی آموزشی مستقل سه‌بعدی برای تجربهٔ عملی فرایند تأمین مالی جمعی است. هر شش محیط بازطراحی‌شده قابل اجرا هستند. بازیکن با چهار نقش، از بررسی پرونده تا ثبت خرید، تطبیق بانکی، صدور گواهی و اولین پرداخت سود پیش می‌رود. نسخهٔ قابل‌بازی همچنان در حال توسعه و بازبینی کیفیت است. تمام عملیات مالی ساختگی و محلی‌اند.
 
 ## Continuous integration
 
