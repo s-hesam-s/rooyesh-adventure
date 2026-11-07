@@ -1,7 +1,7 @@
 export const characters={
  "manager": {
   "id": "manager",
-  "name": "سارا",
+  "name": "شبنم",
   "role": "مدیر مالی",
   "shirt": "#365b73",
   "pants": "#263d4c",
@@ -9,7 +9,8 @@ export const characters={
   "skin": "#dab18f",
   "bag": "#343f54",
   "glove": "#455969",
-  "scarf": true,
+  "scarf": false,
+  "curly": true,
   "portrait": "./assets/characters/sara.svg"
  },
  "owner": {
@@ -27,20 +28,21 @@ export const characters={
  },
  "client": {
   "id": "client",
-  "name": "آرمان",
+  "name": "مانی",
   "role": "سرمایه‌گذار حقیقی",
-  "shirt": "#6b8464",
-  "pants": "#35554b",
-  "hair": "#343e32",
+  "shirt": "#171719",
+  "pants": "#111114",
+  "hair": "#261d1b",
   "skin": "#e4b68e",
-  "bag": "#68745a",
-  "glove": "#887c60",
+  "bag": "#161619",
+  "glove": "#171719",
   "scarf": false,
+  "bald": true,
   "portrait": "./assets/characters/arman.svg"
  },
  "legal": {
   "id": "legal",
-  "name": "لیلا",
+  "name": "غزاله",
   "role": "نماینده سرمایه‌گذار حقوقی",
   "shirt": "#76556d",
   "pants": "#473b50",

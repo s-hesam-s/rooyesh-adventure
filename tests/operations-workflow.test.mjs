@@ -10,7 +10,7 @@ import {buildOperationsScene} from '../app/src/render/operationsScene.js';
 import {walkable,findPath} from '../app/src/game/world.js';
 import {canInspectFrom} from '../app/src/game/firstPerson.js';
 import {readSave,writeSave,KEY} from '../app/src/game/campaignStorage.js';
-const act=(s,a,v)=>operationsAct(s,a,v),begin=()=>act(createEnvironmentTestJourney('verifyBank','operations-test'),'begin');
+const act=(s,a,v)=>operationsAct(s,a,a==='begin'&&v===undefined?1:v),begin=()=>act(createEnvironmentTestJourney('verifyBank','operations-test'),'begin');
 function bankVerified(){let s=begin();for(const [a,v]of [['intake'],['bank'],['bank-finish'],['bank-record','exact'],['verify-bank']])s=act(s,a,v);return s;}
 function scan(s,id){for(const [a,v]of [['take',id],['lid'],['load'],['lid'],['scan'],['scan-finish'],['lid'],['unload'],['lid'],['return']])s=act(s,a,v);return s;}
 function approved(){let s=scan(bankVerified(),'original');for(const key of operationsFields)s=act(s,'check',key);return act(s,'verify-receipt');}
@@ -31,3 +31,46 @@ test('operations carries the same lower left-hand grip immediately and follows c
 test('panels show only station data and actions; guide remains optional and all actions are keyboard buttons',()=>{for(const id of ['intake','bank','review','scanner','dispatch','printer','pack','guide']){const p=operationsPanel(begin(),id);assert.ok(p.title);assert.ok(p.body.includes('button')||p.guide);}const p=operationsPanel(sent(),'dispatch');assert.ok(p.body.includes('FB-80'));assert.ok(p.body.includes('FB-200'));assert.equal(p.body.includes('data-operations-value="N-80"'),false);});
 
 test('monitor necks remain behind the readable screen and printed sheet rests fully on its physical output tray',()=>{const root=built();root.updateWorldMatrix(true,true);for(const name of ['operations-bank','operations-online-status','operations-slip-status']){const neck=root.getObjectByName(name+'-neck'),screen=root.getObjectByName(name+'-screen'),box=new T.Box3().setFromObject(neck);assert.ok(box.max.z<screen.getWorldPosition(new T.Vector3()).z,name+' neck occludes display');assert.ok(root.getObjectByName(name+'-vesa-mount'));}const camera=new T.PerspectiveCamera();root.userData.operationsUpdate(act(act(sent(),'print'),'print-finish'),1/60,camera,false,{});root.updateWorldMatrix(true,true);const sheet=root.getObjectByName('operations-printed-report'),tray=root.getObjectByName('operations-printer-output-tray'),paperBox=new T.Box3().setFromObject(sheet),trayBox=new T.Box3().setFromObject(tray);assert.ok(paperBox.min.x>=trayBox.min.x&&paperBox.max.x<=trayBox.max.x);assert.ok(paperBox.min.z>=trayBox.min.z&&paperBox.max.z<=trayBox.max.z);assert.ok(paperBox.min.y>=trayBox.max.y&&paperBox.min.y-trayBox.max.y<.012,'paper supported on tray');assert.equal(sheet.rotation.y,0);});
+
+test('modern operations tracks the original through each station and restores the complete route',()=>{
+ const root=built(),camera=new T.PerspectiveCamera();
+ let s=operationsAct(createEnvironmentTestJourney('verifyBank','operations-test'),'begin');
+ const run=(action,value)=>{s=act(s,action,value);assert.deepEqual(restoreJourney(s),s,action);};
+ const visible=name=>{
+  root.userData.operationsUpdate(s,1/60,camera,false,{reduced:true});
+  const mesh=root.getObjectByName(name);
+  for(let parent=mesh;parent;parent=parent.parent)if(!parent.visible)return false;
+  return true;
+ };
+ assert.equal(s.operations.version,2);
+ run('intake');
+ assert.throws(()=>act(s,'bank'));
+ assert.equal(visible('operations-intake-original'),false);
+ run('open-bundle');
+ assert.equal(visible('operations-intake-original'),true);
+ assert.equal(visible('operations-intake-online'),true);
+ for(const a of ['bank','bank-finish'])run(a);
+ run('bank-record','exact');run('verify-bank');
+ assert.throws(()=>act(s,'take','copy'));
+ run('take','original');
+ assert.equal(visible('operations-intake-original'),false);
+ assert.throws(()=>act(act(s,'lid'),'load'));
+ run('place-review');
+ assert.equal(visible('operations-review-original'),true);
+ assert.equal(visible('operations-review-copy'),false);
+ assert.throws(()=>act(s,'lift-review'));
+ for(const field of operationsFields.filter(field=>field!=='image'))run('check',field);
+ for(const a of ['lift-review','lid','load','lid','scan','scan-finish'])run(a);
+ assert.throws(()=>act(s,'check','image'));
+ run('lid');run('unload');run('check','image');run('verify-receipt');
+ assert.throws(()=>act(s,'query'));
+ run('file-original');
+ assert.equal(visible('operations-filed-original'),true);
+ run('query');run('query-finish');
+ assert.equal(s.operations.onlineTrace,'FB-80');
+ assert.throws(()=>act(s,'send','N-80'));
+ run('send','N-200');
+ for(const a of ['send-finish','print','print-finish','collect-report','assemble','collect-case','leave'])run(a);
+ assert.equal(s.operations.slipTrace,'FB-200');
+ assert.equal(s.operations.done,true);
+});

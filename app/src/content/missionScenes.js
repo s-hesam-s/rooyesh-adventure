@@ -46,7 +46,7 @@ export const missionScenes=Object.fromEntries(specs.map((s,i)=>{
   entryYaw:Math.atan2(entry.x-approach.x,entry.y-approach.y),
   sky:['#c7d7df','#e2cfae','#afc5cc','#c5cadd'][i%4],
   guide:{id:'guide-'+id,name:guideName,role:guideRole,color:accent,accessory,height:5.1+(i%5)*.21,width:.88+(i%4)*.08},
-  evidenceName:['پرونده بایگانی','تقویم طرح','کارت شرکت مجری','بسته فیش تعهد','پاکت ارسال مجری','مجوز انتشار','کارت هویت حقیقی','دفتر خرید اول','درخواست درگاه','گزارش پاسخ بانک','اصل فیش و برگه‌های مقایسه','گزارش استعلام ارسال','پرونده شرکت بهار','نقشه ظرفیت طرح','محموله فیش حقوقی','صورت تکمیل منابع','صورت‌جلسه تأیید','گواهی آرمان','جدول سررسیدهای سود','سند پرداخت نوبت اول'][i]
+  evidenceName:['پرونده بایگانی','تقویم طرح','کارت شرکت مجری','بسته فیش تعهد','پاکت ارسال مجری','مجوز انتشار','کارت هویت حقیقی','دفتر خرید اول','درخواست درگاه','گزارش پاسخ بانک','اصل فیش و برگه‌های مقایسه','گزارش استعلام ارسال','پرونده شرکت بهار','نقشه ظرفیت طرح','محموله فیش حقوقی','صورت تکمیل منابع','صورت‌جلسه تأیید','گواهی مانی','جدول سررسیدهای سود','سند پرداخت نوبت اول'][i]
  }];
 }));
 Object.assign(missionScenes.project,{archiveRoom:true,entry:{x:640,y:800},approach:{x:640,y:680},hub:{x:640,y:430},targets:[{x:330,y:190},{x:640,y:160},{x:950,y:190}],stations:[{x:420,y:630},{x:860,y:630}],entryYaw:0});
@@ -65,7 +65,7 @@ Object.assign(missionScenes.naturalIdentity,{receptionRoom:true,entry:{x:640,y:8
 Object.assign(missionScenes.naturalIdentity.guide,{identity:'kaveh',accessory:'reception',role:'کارشناس پذیرش و تطبیق مدارک'});
 Object.assign(missionScenes.naturalSlip,{orchardRoom:true,entry:{x:640,y:840},hub:{x:640,y:600},stations:[{x:460,y:740},{x:170,y:690}],targets:[{x:290,y:270},{x:640,y:150},{x:990,y:390}],entryYaw:0,evidenceName:'برگه بررسی خرید اول'});
 Object.assign(missionScenes.naturalSlip.guide,{identity:'simin',accessory:'orchard',role:'راهنمای واحد و بودجه خرید'});
-Object.assign(missionScenes.gateway,{paymentRoom:true,name:'ایستگاه خودکار پرداخت',entry:{x:640,y:840},hub:{x:640,y:600},stations:[{x:520,y:710},{x:860,y:620}],targets:[{x:340,y:250},{x:640,y:130},{x:940,y:250}],entryYaw:0,evidenceName:'برگه خرید دوم آرمان'});
+Object.assign(missionScenes.gateway,{paymentRoom:true,name:'ایستگاه خودکار پرداخت',entry:{x:640,y:840},hub:{x:640,y:600},stations:[{x:520,y:710},{x:860,y:620}],targets:[{x:340,y:250},{x:640,y:130},{x:940,y:250}],entryYaw:0,evidenceName:'برگه خرید دوم مانی'});
 Object.assign(missionScenes.gateway.guide,{identity:'paymentSaman',name:'سامان',accessory:'headset',role:'پشتیبان پرداخت دیجیتال'});
 Object.assign(missionScenes.verifyBank,{bankRoom:true,name:'اتاق پایاپای بانک',entry:{x:640,y:800},hub:{x:640,y:590},stations:[{x:500,y:670},{x:780,y:710}],targets:[{x:220,y:450},{x:500,y:130},{x:1060,y:530}],entryYaw:0,evidenceName:'پرونده تطبیق پرداخت N-80'});
 Object.assign(missionScenes.verifyBank.guide,{identity:'bankParisa',name:'پریسا',accessory:'glasses',role:'کارشناس تطبیق بانک'});
