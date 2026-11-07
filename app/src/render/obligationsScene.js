@@ -1,11 +1,12 @@
 import {obligationsDates,obligationsDateAt,displayObligationsDate} from '../game/obligationsCalendar.js';
 import * as T from '../../vendor/three.module.js';
-import {ceremony,partyStage,discoDescent,obligationsBoundary,obligationsFixtures} from '../game/obligationsRoom.js';
+import {ceremony,obligationsBoundary,obligationsFixtures} from '../game/obligationsRoom.js';
 import {obligationsDurations,obligationsState} from '../game/obligationsWorkflow.js';
 import {documentCarryPose} from './documentCarry.js';
 
 export function buildObligationsScene(root,node,layout,h){
  const {box,beam}=h;
+ const dynamic=object=>object.traverse(part=>{if(part.isMesh)part.userData.dynamic=true;});
  const oak='#886047',steel='#314952',cream='#d5d4c8',glass='#adc7cb',paper='#f3e9cf',black='#242f33';
  const block=(x,y,z,w,height,d,c)=>box(root,x,y,z,w,height,d,c);
  const shape=new T.Shape();
@@ -120,82 +121,6 @@ export function buildObligationsScene(root,node,layout,h){
  });
  const pivot=new T.Mesh(new T.CylinderGeometry(.059,.059,.16,16),h.mat(steel));
  pivot.geometry.userData.transient=true;pivot.rotation.z=Math.PI/2;scissors.add(pivot);
- const party=new T.Group();root.add(party);
- const ball=new T.Group();ball.name='courtyard-disco-ball';party.add(ball);
- const chrome=new T.MeshStandardMaterial({color:'#a2b1c9',metalness:.65,roughness:.28});
- chrome.userData.transient=true;
- const coreBall=new T.Mesh(new T.SphereGeometry(.72,28,18),chrome);
- coreBall.geometry.userData.transient=true;ball.add(coreBall);
- const tileGeometry=new T.PlaneGeometry(.122,.122);tileGeometry.userData.transient=true;
- const tileMaterial=new T.MeshStandardMaterial({color:'#ffffff',roughness:.23,metalness:.45,emissive:'#475169',emissiveIntensity:.4});
- tileMaterial.userData.transient=true;
- const tileCount=192,tiles=new T.InstancedMesh(tileGeometry,tileMaterial,tileCount);
- const tile=new T.Object3D(),normal=new T.Vector3(),forward=new T.Vector3(0,0,1);
- const colors=['#ddeafc','#a6cbff','#ffe3aa','#bbaaff','#f6b7e7'];
- for(let i=0;i<tileCount;i++){
-  const y=1-2*(i+.5)/tileCount,angle=i*2.39996323,r=Math.sqrt(1-y*y);
-  normal.set(Math.cos(angle)*r,y,Math.sin(angle)*r);tile.position.copy(normal).multiplyScalar(.731);
-  tile.quaternion.setFromUnitVectors(forward,normal);tile.updateMatrix();tiles.setMatrixAt(i,tile.matrix);
-  tiles.setColorAt(i,new T.Color(colors[i%colors.length]));
- }
- ball.add(tiles);
- const partyZ=partyStage.z;
- for(const side of [-1,1]){
-  const postX=entryX+side*4.95;
-  block(postX,.15,partyZ,.76,.3,.7,steel);
-  block(postX,4.5,partyZ,.14,9,.14,steel);
-  beam(root,[postX,8.15,partyZ],[postX-side*.85,9,partyZ],.105,steel);
- }
- block(entryX,9,partyZ,10.1,.15,.14,steel);
- block(entryX,8.95,partyZ,.53,.26,.34,steel);
- const cord=beam(party,[entryX,5,partyZ],[entryX,8.82,partyZ],.03,steel);
- const partyLights=['#ff50a4','#6ba6ff','#8affb8','#ffd472'].map((color,i)=>{
-  const light=new T.PointLight(color,0,14,2);light.position.set(entryX+(i%2?4:-4),3.2,23+Math.floor(i/2)*6);party.add(light);return light;
- });
- const dots=Array.from({length:32},(_,i)=>{
-  const material=new T.MeshBasicMaterial({color:partyLights[i%4].color,transparent:true,opacity:.5,depthWrite:false});
-  material.userData.transient=true;
-  const geometry=new T.CircleGeometry(.16+(i%3)*.055,12);geometry.userData.transient=true;
-  const dot=new T.Mesh(geometry,material);dot.rotation.x=-Math.PI/2;party.add(dot);return dot;
- });
- const thanksGroup=new T.Group();thanksGroup.name='courtyard-thanks-sign';thanksGroup.position.set(entryX,0,28.34);thanksGroup.rotation.y=Math.PI;party.add(thanksGroup);
- function partyText(text,x,y,width,height,size){
-  const canvas=globalThis.document.createElement('canvas');canvas.width=1024;canvas.height=512;
-  const context=canvas.getContext('2d');
-  context.direction=/^[A-Z]+$/.test(text)?'ltr':'rtl';context.textAlign='center';context.textBaseline='middle';
-  context.font='900 '+size+'px Vazirmatn, sans-serif';context.lineJoin='round';
-  context.lineWidth=38;context.strokeStyle='#3a86ff';context.strokeText(text,512,270,950);
-  context.lineWidth=26;context.strokeStyle='#ffbe0b';context.strokeText(text,512,260,950);
-  context.lineWidth=15;context.strokeStyle='#ff006e';context.strokeText(text,512,250,950);
-  context.fillStyle='#ffffff';context.fillText(text,512,250,950);
-  const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;
-  const material=new T.MeshBasicMaterial({map,transparent:true,alphaTest:.12,toneMapped:false});
-  material.userData={transient:true,ownedMap:true};
-  const geometry=new T.PlaneGeometry(width,height);geometry.userData.transient=true;
-  const word=new T.Group();word.position.set(x,y,0);thanksGroup.add(word);
-  for(let i=0;i<3;i++){const face=new T.Mesh(geometry,material);face.position.set(i*.025,-i*.035,-i*.042);word.add(face);}
-  return word;
- }
- const countdown=['ONE','TWO','THREE','FOUR'].map((word,i)=>partyText(word,(i-1.5)*2.05,6.9,2.65,1.33,270));
- const thanksWords=[partyText('تشکر',0,5.05,6.8,3.4,305),partyText('تشکر',0,3.57,6.8,3.4,305)];
- const closingLine=partyText('استقلال سوراخه',0,2.25,5.6,2.8,150);
- const colorBackdropMaterial=new T.ShaderMaterial({
-  transparent:true,depthWrite:false,side:T.DoubleSide,uniforms:{clock:{value:0}},
-  vertexShader:'varying vec2 uvPos; void main(){uvPos=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
-  fragmentShader:`varying vec2 uvPos; uniform float clock;
-   void main(){
-    vec2 p=uvPos-.5;
-    float a=atan(p.y,p.x)*.95-clock*1.4+sin(length(p)*13.0-clock)*.5;
-    vec3 color=.57+.43*cos(a+vec3(0.,2.094,4.189));
-    float edge=smoothstep(0.,.09,min(min(uvPos.x,1.-uvPos.x),min(uvPos.y,1.-uvPos.y)));
-    gl_FragColor=vec4(color,.64*edge);
-   }`
- });
- colorBackdropMaterial.userData.transient=true;
- const colorBackdropGeometry=new T.PlaneGeometry(15.5,8.6);colorBackdropGeometry.userData.transient=true;
- const colorBackdrop=new T.Mesh(colorBackdropGeometry,colorBackdropMaterial);
- colorBackdrop.position.set(entryX,4.35,29.8);colorBackdrop.renderOrder=-1;party.add(colorBackdrop);
- const confetti=Array.from({length:42},(_,i)=>box(party,0,0,0,.095,.03,.18,colors[i%colors.length]));
  const document=(x,y,z,w,d,lines)=>{
   const group=new T.Group();root.add(group);group.position.set(x,y,z);
   box(group,0,0,0,w,.045,d,paper);
@@ -240,7 +165,7 @@ export function buildObligationsScene(root,node,layout,h){
    box(stand,0,.025,-.71,2.52,.1,.075,oak);
    for(const side of [-1,1])box(drawer,side*.9,-.22,.91,.14,.4,.44,steel);
    drawerFolder=document(0,.19,.74,2.28,1.3,['پرونده طرح آفتاب','قرارداد و برنامه سود']);
-   drawerFolder.rotation.x=-.58;
+   drawerFolder.rotation.set(-.58,Math.PI,0);
    drawer.add(drawerFolder);
    box(drawerFolder,0,-.045,0,2.43,.055,1.43,'#bf8841');
    box(drawerFolder,.82,-.016,-.65,.62,.055,.24,'#d9a354');
@@ -370,59 +295,21 @@ export function buildObligationsScene(root,node,layout,h){
   }
  }
  bank=document(0,0,0,1.7,2.2,['سند بانکی','نوبت ۱ · ۶۰ میلیون','پرداخت موفق']);
+ const filedBank=document(fixture('payment').x+2.08,2.575,fixture('payment').z,1.28,1.64,['سند بانکی بایگانی‌شده','INTEREST-1 · ۶۰ میلیون']);
  const heldPlan=document(0,0,0,1.63,1.2,['برنامه سررسید','۴ نوبت · هر نوبت ۶۰ میلیون']);
  const heldContract=document(0,0,0,2.3,3,['قرارداد طرح آفتاب','۱٬۰۰۰ میلیون تومان','۲۴٪ · ۱۲ ماه']);
- root.userData.obligationsUpdate=(state,camera,paused,{carry,jobElapsed,reduced,dt,time=0,thanksElapsed=null})=>{
+ for(const object of [drawer,contract,contractBase,contractCover,bank,incoming,loaded,printout,scanLight,scanLid,docked,mailLamp,printerLamp,printerSlotLight,heldPlan,heldContract,filedBank,scissors,...doorLeaves,...calendarTabs,...paymentTabs])dynamic(object);
+ let ribbonPhase=null;
+ root.userData.obligationsUpdate=(state,camera,paused,{carry,jobElapsed,reduced,dt})=>{
   const o=obligationsState(state),progress=o.job?Math.min(1,jobElapsed/obligationsDurations[o.job]):0;
   updateClock(state,o,progress,reduced);
   const doorFraction=o.doorOpen?1:o.job==='door'?T.MathUtils.smoothstep(progress,0,1):0;
   doorLeaves.forEach((leaf,i)=>{const side=i===0?-1:1;leaf.position.set(entryX+side*(half/2+doorFraction*half),0,doorZ+.22);});
   const cutting=o.job==='ribbon',phase=cutting?Math.min(1,jobElapsed/3.5):o.ribbonCut?1:0;
-  const thanks=thanksElapsed!==null,partyProgress=o.ribbonCut?1:cutting?discoDescent(jobElapsed-2.45):0;
-  const descent=partyProgress;
-  party.visible=partyProgress>0;
-  if(party.visible){
-   const t=reduced?0:time;
-   ball.position.set(entryX,partyStage.top-partyStage.drop*descent,partyZ);
-   ball.rotation.y=t*.86;ball.rotation.z=.12;
-   const cableLength=8.82-ball.position.y-.68;
-   cord.visible=cableLength>0;cord.position.y=8.82-cableLength/2;cord.scale.y=Math.max(.001,cableLength/3.82);
-   partyLights.forEach((light,i)=>{
-    if(thanks)light.color.setHSL((t*.17+i*.25)%1,.94,.62);
-    else light.color.set(['#ff50a4','#6ba6ff','#8affb8','#ffd472'][i]);
-    light.intensity=partyProgress*((thanks?57:41)+18*Math.sin(t*1.55+i*1.57));
-   });
-   dots.forEach((dot,i)=>{
-    const angle=i*2.399+t*(i%2?.49:-.39),radius=1.2+(i%10)*.57;
-    dot.position.set(entryX+Math.cos(angle)*radius,.082,23.6+Math.sin(angle)*radius);
-    dot.material.color.copy(partyLights[i%4].color);
-    dot.material.opacity=partyProgress*((thanks?.39:.3)+.19*Math.sin(t*2+i));
-   });
-   colorBackdrop.visible=thanks;colorBackdropMaterial.uniforms.clock.value=t;
-   thanksGroup.visible=thanks;
-   if(thanks){
-    const reveal=(word,delay,low,high,tilt)=>{
-     const age=thanksElapsed-delay;
-     word.visible=reduced||age>=0;
-     const pulse=reduced?.5:(1-Math.cos(Math.max(0,age)*Math.PI*2/.65))*.5;
-     word.scale.setScalar(T.MathUtils.lerp(low,high,pulse));
-     word.rotation.z=tilt*(pulse*2-1);
-    };
-    countdown.forEach((word,i)=>reveal(word,i*.42,.92,1.12,.035));
-    thanksWords.forEach((word,i)=>reveal(word,1.68+i*.22,.68,1.22,.052));
-    closingLine.visible=reduced||thanksElapsed>=2.55;
-   }
-   confetti.forEach((piece,i)=>{
-    const cycle=(i*.371+t*(.22+i%4*.045))%1;
-    piece.visible=!reduced;
-    piece.position.set(entryX+(i*1.79%10)-5+Math.sin(t+i)*.45,7.8-cycle*7.7,21+i*2.13%8);
-    piece.rotation.set(t+i,i*.29+t*.6,t*1.9+i);
-   });
-  }
   const close=T.MathUtils.smoothstep(phase,.43,.59);
   const release=T.MathUtils.smoothstep(phase,.59,.92);
   const recoil=Math.sin((phase-.59)*29)*Math.sin(Math.PI*release)*.14;
-  for(const {side,geometry} of ribbonHalves){
+  if(phase!==ribbonPhase)for(const {side,geometry} of ribbonHalves){
    const vertices=geometry.attributes.position;
    let x=entryX+side*halfRibbon,y=ribbonY;
    for(let i=0;i<=24;i++){
@@ -437,6 +324,7 @@ export function buildObligationsScene(root,node,layout,h){
    }
    vertices.needsUpdate=true;geometry.computeVertexNormals();
   }
+  ribbonPhase=phase;
   scissors.visible=cutting;
   if(cutting){
    const approach=T.MathUtils.smoothstep(phase,.06,.40),withdraw=T.MathUtils.smoothstep(phase,.70,.98);
@@ -477,6 +365,7 @@ export function buildObligationsScene(root,node,layout,h){
   printerSlotLight.visible=printing;
   printout.visible=(printing&&feed>0)||o.printed&&!o.planDocked&&o.held!=='plan';
   printout.position.z=fixture('printer').z+.26+1.4*feed;
+  filedBank.visible=Boolean(o.bankFiled);
   bank.visible=o.held==='bank'&&!paused;heldContract.visible=(o.held==='contract'||o.job==='pickup')&&!paused;heldPlan.visible=o.held==='plan'&&!paused;
   if(paused||!o.held&&o.job!=='pickup')return false;
   const model=bank.visible?bank:heldPlan.visible?heldPlan:heldContract;

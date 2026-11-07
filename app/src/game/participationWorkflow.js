@@ -76,8 +76,9 @@ export function participationAction(state,action,value,core){
  case 'assemble':idle();requireParticipation(o.firstRegistered&&o.receiptCollected&&(o.version===1||o.slipFiled)&&o.held==='gateway-receipt'&&!o.assembled,'رسید چاپ‌شده را به میز خرید بیاور.');o.assembled=true;o.held=null;break;
  case 'collect-case':idle();requireParticipation(o.assembled&&!o.held&&!o.handed,'بسته مدارک آماده برداشت نیست.');o.held='dossier';break;
  case 'handoff':idle();requireParticipation(o.requested&&o.held==='dossier'&&!o.handed,'بسته دو خرید را از میز بردار.');o.handoffOrigin=exchangeOrigin(value,'participation');o.job={kind:'handoff'};break;
- case 'handoff-finish':requireParticipation(o.job?.kind==='handoff','تحویل شروع نشده است.');o.handed=true;o.held=null;o.job=null;next.role='manager';break;
- case 'leave':idle();requireParticipation(o.handed&&next.nodeId==='verifyBank'&&next.role==='manager','ابتدا بسته را به شبنم تحویل بده.');o.done=true;break;
+ case 'handoff-finish':requireParticipation(o.job?.kind==='handoff','تحویل شروع نشده است.');o.handed=true;o.held=null;o.job=null;next.role='manager';if(!core.replay||value==='collect-received'){value='collect-received';o.receivedPickupRequired=true;}break;
+ case 'collect-received':idle();requireParticipation(o.handed&&!o.held&&next.role==='manager','بسته روی میز تحویل آماده نیست.');o.held='dossier';break;
+ case 'leave':idle();requireParticipation((!o.receivedPickupRequired||o.held==='dossier')&&o.handed&&next.nodeId==='verifyBank'&&next.role==='manager','ابتدا بسته را به شبنم تحویل بده.');o.done=true;break;
  default:throw Error('عملیات خانه مشارکت نامعتبر است.');
  }
  return {...next,participation:o,events:[...events,{kind:'participation',node,action,...(value!==undefined?{value}:{})}]};
@@ -104,6 +105,7 @@ export function participationGuidance(state){
  if(!o.requested)return 'کارت بانکی را روی نگهدارنده بگذار و خرید دوم را با رمز تلفن ثبت کن.';
  if(!o.receiptCollected)return 'رسید N-80 را چاپ کن و از سینی بردار.';
  if(!o.assembled)return 'رسید چاپ‌شده را روی میز خرید کنار فیش اول بگذار.';
+ if(o.handed&&o.receivedPickupRequired&&!o.held)return 'بسته دو خرید را از میز تحویل بردار و همراه خود به مرکز عملیات ببر.';
  if(!o.handed)return 'بسته دو خرید را از میز بردار و به شبنم بده.';
  return 'از در کنار کانتر به مرکز عملیات مالی برو.';
 }

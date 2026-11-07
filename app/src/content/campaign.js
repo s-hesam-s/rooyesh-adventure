@@ -656,7 +656,7 @@ for(const [i,c] of challenges.entries()){
    exits:[{id:'retry',label:'بازگشت با گزارش اصلاح',requires:key,next:c.id,detail:'به مأموریت قبلی برمی‌گردی تا با توجه به علت خطا، دوباره تصمیم بگیری.'},{id:'briefing',label:'مرور دوباره پرونده',requires:key,next:c.id,detail:'به همان مأموریت برمی‌گردی تا مدارک را دوباره بخوانی؛ هنوز باید چالش آن را حل کنی.'}]};
  }
 }
-export const endings={campaign:{kind:'good',title:'آفتاب به تعهدش رسید',subtitle:'۱۰ مرحله / یک زنجیره معتبر',text:'با چهار شخصیت، طرح را از پرونده اولیه تا گواهی مشارکت و اولین پرداخت واقعی سود پیش بردی. سه سررسید بعدی همچنان تعهد بازند. همه مبالغ، اسناد و پاسخ‌ها آموزشی و محلی‌اند.'}};
+export const endings={campaign:{kind:'good',title:'آفتاب به تعهدش رسید',subtitle:'۱۰ مرحله / یک زنجیره معتبر',text:'با چهار شخصیت، طرح را از پرونده اولیه تا گواهی مشارکت و اولین پرداخت سود پیش بردی. سه سررسید بعدی همچنان در دفتر تعهدات بازند.'}};
 nodes['end-campaign']={id:'end-campaign',chapter:10,role:'manager',theme:'garden',title:endings.campaign.title,area:'پایان فصل آفتاب',objective:'دفتر سفر، تصمیم‌ها و مسیرهای اصلاح را مرور کن.',objects:[],exits:[],ending:'campaign'};
 nodes.project.objects.push({id:'directory',kind:'wayfinding',name:'تابلو راهنمای سه ورودی',position:{x:640,y:240},routes:nodes.project.exits.map(e=>({id:e.id,label:e.label})),text:'هر سه ورودی را می‌توانی از همین تابلو مقایسه کنی.\n\n'+nodes.project.exits.map((e,i)=>['سمت چپ','روبه‌رو','سمت راست'][i]+': '+e.label).join('\n\n')+'\n\nبا نزدیک‌شدن به در مربوط، آن را باز می‌کنی و انتخاب هنگام عبور ثبت می‌شود؛ تابلو فقط راهنمای مسیر است و هیچ تصمیمی را به جای تو ثبت نمی‌کند.'});
 for(const id of ['repair-project-0','repair-project-2']){
